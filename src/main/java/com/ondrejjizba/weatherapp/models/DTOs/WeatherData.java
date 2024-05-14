@@ -9,9 +9,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WeatherResponse {
+public class WeatherData {
     private Weather[] weather;
     private MainData main;
+    private Sys sys;
+    private String name;
+    private Long timezone;
 
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,5 +26,12 @@ public class WeatherResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MainData {
         private double temp;
+    }
+
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Sys {
+        private Long sunrise;
+        private Long sunset;
     }
 }

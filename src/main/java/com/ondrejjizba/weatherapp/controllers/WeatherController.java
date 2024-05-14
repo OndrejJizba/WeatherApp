@@ -1,14 +1,15 @@
 package com.ondrejjizba.weatherapp.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ondrejjizba.weatherapp.models.DTOs.WeatherResponse;
-import org.apache.hc.client5.http.classic.HttpClient;
+import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
+import com.ondrejjizba.weatherapp.models.WeatherEntity;
+import com.ondrejjizba.weatherapp.services.WeatherService;
+import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,20 +21,22 @@ import java.util.Map;
 
 @RestController
 public class WeatherController {
+    private final WeatherService weatherService;
+    @Autowired
+    public WeatherController(WeatherService weatherService) {
+        this.weatherService = weatherService;
+    }
 
     @GetMapping("/weather")
     public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) throws IOException {
-        String apiKey = "5ca9d598d2838310f457258b0c48720c";
-        HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/weather?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey);
-        CloseableHttpClient client = HttpClients.createDefault();
-        String response = client.execute(request, new BasicHttpClientResponseHandler());
-        ObjectMapper objectMapper = new ObjectMapper();
-        WeatherResponse weatherResponse = objectMapper.readValue(response, WeatherResponse.class);
-        String weatherDescription = weatherResponse.getWeather()[0].getDescription();
-        double temperature = weatherResponse.getMain().getTemp();
+        String response = weatherService.fetchData(lat, lon);
+        WeatherEntity weatherEntity = weatherService.processWeatherData(response);
         Map<String, Object> result = new HashMap<>();
-        result.put("description", weatherDescription);
-        result.put("temperature", temperature);
+        result.put("name", weatherEntity.getName());
+        result.put("description", weatherEntity.getDescription());
+        result.put("temperature", weatherEntity.getTemperature());
+        result.put("sunrise", weatherEntity.getSunrise());
+        result.put("sunset", weatherEntity.getSunset());
         return ResponseEntity.status(200).body(result);
     }
 
