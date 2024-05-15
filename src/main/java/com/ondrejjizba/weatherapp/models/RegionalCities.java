@@ -16,6 +16,6 @@ public class RegionalCities {
     private String city;
     private String lat;
     private String lon;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     private RegionalCitiesWeather regionalCitiesWeather;
 }

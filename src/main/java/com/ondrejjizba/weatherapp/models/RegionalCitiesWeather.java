@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,6 +20,18 @@ public class RegionalCitiesWeather {
     private String description;
     private String sunrise;
     private String sunset;
-    @OneToOne (fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @DateTimeFormat(pattern = "dd-MM-yy HH:mm:ss")
+    private LocalDateTime updatedAt;
+    @OneToOne (fetch = FetchType.LAZY)
     private RegionalCities regionalCities;
+
+    @PrePersist
+    protected void onCreate(){
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate(){
+        this.updatedAt = LocalDateTime.now();
+    }
 }

@@ -8,12 +8,14 @@ import com.ondrejjizba.weatherapp.repositories.RegionalCitiesRepository;
 import com.ondrejjizba.weatherapp.repositories.RegionalCitiesWeatherRepository;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,17 +32,24 @@ public class RegionalWeatherService {
         this.regionalCitiesWeatherRepository = regionalCitiesWeatherRepository;
         this.weatherService = weatherService;
     }
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(cron = "0 0 * * * *")
     public void hourlyRegionalCitiesWeatherUpdate() throws IOException {
         List<RegionalCities> cities = regionalCitiesRepository.findAll();
         for (RegionalCities city : cities) {
             String response = weatherService.fetchData(city.getLat(), city.getLon());
             WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
+
             RegionalCitiesWeather regionalCitiesWeather = new RegionalCitiesWeather();
+            if (city.getRegionalCitiesWeather() != null) {
+                regionalCitiesWeather = regionalCitiesWeatherRepository.findById(city.getRegionalCitiesWeather().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCitiesWeather().getId()));
+            }
+
             regionalCitiesWeather.setTemperature(weatherData.getMain().getTemp());
             regionalCitiesWeather.setDescription(weatherData.getWeather()[0].getDescription());
             regionalCitiesWeather.setSunrise(UnixTimeConverter.converter(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
             regionalCitiesWeather.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+            regionalCitiesWeather.setUpdatedAt(LocalDateTime.now());
             city.setRegionalCitiesWeather(regionalCitiesWeather);
             regionalCitiesWeather.setRegionalCities(city);
             regionalCitiesWeatherRepository.save(regionalCitiesWeather);
