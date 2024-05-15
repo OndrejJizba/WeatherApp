@@ -3,6 +3,7 @@ package com.ondrejjizba.weatherapp.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
+import com.ondrejjizba.weatherapp.scheduled.RegionalWeatherService;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -22,9 +23,11 @@ import java.util.Map;
 @RestController
 public class WeatherController {
     private final WeatherService weatherService;
+    private final RegionalWeatherService regionalWeatherService;
     @Autowired
-    public WeatherController(WeatherService weatherService) {
+    public WeatherController(WeatherService weatherService, RegionalWeatherService regionalWeatherService) {
         this.weatherService = weatherService;
+        this.regionalWeatherService = regionalWeatherService;
     }
 
     @GetMapping("/weather")
@@ -47,5 +50,11 @@ public class WeatherController {
         CloseableHttpClient client = HttpClients.createDefault();
         String response = client.execute(request, new BasicHttpClientResponseHandler());
         return ResponseEntity.status(200).body(response);
+    }
+
+    @GetMapping("/test2")
+    public ResponseEntity<?> test2() throws IOException {
+        regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
+        return ResponseEntity.status(200).build();
     }
 }
