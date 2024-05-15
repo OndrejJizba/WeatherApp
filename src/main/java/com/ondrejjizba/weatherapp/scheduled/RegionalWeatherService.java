@@ -36,7 +36,7 @@ public class RegionalWeatherService {
     public void hourlyRegionalCitiesWeatherUpdate() throws IOException {
         List<RegionalCity> cities = regionalCityRepository.findAll();
         for (RegionalCity city : cities) {
-            String response = weatherService.fetchData(city.getLat(), city.getLon());
+            String response = weatherService.fetchWeatherData(city.getLat(), city.getLon());
             WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
 
             RegionalCityWeather regionalCityWeather = new RegionalCityWeather();

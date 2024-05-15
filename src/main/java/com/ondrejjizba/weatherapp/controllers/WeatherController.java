@@ -1,11 +1,9 @@
 package com.ondrejjizba.weatherapp.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
+import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
 import com.ondrejjizba.weatherapp.scheduled.RegionalWeatherService;
 import com.ondrejjizba.weatherapp.services.WeatherService;
-import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,7 +31,7 @@ public class WeatherController {
 
     @GetMapping("/weather")
     public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) throws IOException {
-        String response = weatherService.fetchData(lat, lon);
+        String response = weatherService.fetchWeatherData(lat, lon);
         WeatherEntity weatherEntity = weatherService.processWeatherData(response);
         Map<String, Object> result = new HashMap<>();
         result.put("name", weatherEntity.getName());
@@ -41,6 +40,13 @@ public class WeatherController {
         result.put("sunrise", weatherEntity.getSunrise());
         result.put("sunset", weatherEntity.getSunset());
         return ResponseEntity.status(200).body(result);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchByName(@RequestParam String name) throws IOException {
+        String response = weatherService.fetchGeolocationData(name);
+        List<GeolocationData> geolocationData = weatherService.processGeolocationData(response);
+        return ResponseEntity.status(200).body(geolocationData);
     }
 
     @GetMapping("test")
@@ -55,6 +61,13 @@ public class WeatherController {
     @GetMapping("/test2")
     public ResponseEntity<?> test2() throws IOException {
         regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
+        return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/test3")
+    public ResponseEntity<?> test3() throws IOException {
+        String response = weatherService.fetchGeolocationData("London");
+        weatherService.processGeolocationData(response);
         return ResponseEntity.status(200).build();
     }
 }

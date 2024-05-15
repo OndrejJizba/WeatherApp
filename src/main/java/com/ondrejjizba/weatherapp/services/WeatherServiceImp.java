@@ -1,7 +1,9 @@
 package com.ondrejjizba.weatherapp.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
 import com.ondrejjizba.weatherapp.repositories.WeatherRepository;
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class WeatherServiceImp implements WeatherService{
@@ -27,7 +31,7 @@ public class WeatherServiceImp implements WeatherService{
     }
 
     @Override
-    public String fetchData(String lat, String lon) throws IOException {
+    public String fetchWeatherData(String lat, String lon) throws IOException {
         HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/weather?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY);
         CloseableHttpClient client = HttpClients.createDefault();
         return client.execute(request, new BasicHttpClientResponseHandler());
@@ -44,5 +48,27 @@ public class WeatherServiceImp implements WeatherService{
         weatherEntity.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
         weatherRepository.save(weatherEntity);
         return weatherEntity;
+    }
+
+    @Override
+    public String fetchGeolocationData(String cityName) throws IOException {
+        HttpGet request = new HttpGet("http://api.openweathermap.org/geo/1.0/direct?q=" + cityName + "&limit=5&appid=" + API_KEY);
+        CloseableHttpClient client = HttpClients.createDefault();
+        return client.execute(request, new BasicHttpClientResponseHandler());
+    }
+
+    @Override
+    public List<GeolocationData> processGeolocationData(String response) throws JsonProcessingException {
+        List<GeolocationData> geolocationData = objectMapper.readValue(response, new TypeReference<>() {});
+        List<GeolocationData> geolocationResponse = new ArrayList<>();
+        for (GeolocationData data : geolocationData) {
+            GeolocationData geoResp = new GeolocationData();
+            geoResp.setName(data.getName());
+            geoResp.setLat(data.getLat());
+            geoResp.setLon(data.getLon());
+            geoResp.setCountry(data.getCountry());
+            geolocationResponse.add(geoResp);
+        }
+        return geolocationResponse;
     }
 }
