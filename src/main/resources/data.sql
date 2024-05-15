@@ -6,7 +6,7 @@
 #     lon  DECIMAL(9, 6)
 # );
 
-INSERT INTO regional_cities (city, lat, lon)
+INSERT INTO regional_city (city, lat, lon)
 VALUES ('Brno', 49.195278, 16.608611),
        ('České Budějovice', 48.974444, 14.474444),
        ('Hradec Králové', 50.209444, 15.8325),

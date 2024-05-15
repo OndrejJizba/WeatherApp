@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegionalCitiesWeather {
+public class RegionalCityWeather {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +23,7 @@ public class RegionalCitiesWeather {
     @DateTimeFormat(pattern = "dd-MM-yy HH:mm:ss")
     private LocalDateTime updatedAt;
     @OneToOne (fetch = FetchType.LAZY)
-    private RegionalCities regionalCities;
+    private RegionalCity regionalCity;
 
     @PrePersist
     protected void onCreate(){

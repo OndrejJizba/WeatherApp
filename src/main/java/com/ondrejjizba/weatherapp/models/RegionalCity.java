@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegionalCities {
+public class RegionalCity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,5 +17,5 @@ public class RegionalCities {
     private String lat;
     private String lon;
     @OneToOne(fetch = FetchType.LAZY)
-    private RegionalCitiesWeather regionalCitiesWeather;
+    private RegionalCityWeather regionalCityWeather;
 }

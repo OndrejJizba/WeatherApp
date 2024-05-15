@@ -2,10 +2,10 @@ package com.ondrejjizba.weatherapp.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
-import com.ondrejjizba.weatherapp.models.RegionalCities;
-import com.ondrejjizba.weatherapp.models.RegionalCitiesWeather;
-import com.ondrejjizba.weatherapp.repositories.RegionalCitiesRepository;
-import com.ondrejjizba.weatherapp.repositories.RegionalCitiesWeatherRepository;
+import com.ondrejjizba.weatherapp.models.RegionalCity;
+import com.ondrejjizba.weatherapp.models.RegionalCityWeather;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,39 +21,39 @@ import java.util.List;
 @Service
 @Component
 public class RegionalWeatherService {
-    private final RegionalCitiesRepository regionalCitiesRepository;
-    private final RegionalCitiesWeatherRepository regionalCitiesWeatherRepository;
+    private final RegionalCityRepository regionalCityRepository;
+    private final RegionalCityWeatherRepository regionalCityWeatherRepository;
     private final WeatherService weatherService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public RegionalWeatherService(RegionalCitiesRepository regionalCitiesRepository, RegionalCitiesWeatherRepository regionalCitiesWeatherRepository, WeatherService weatherService) {
-        this.regionalCitiesRepository = regionalCitiesRepository;
-        this.regionalCitiesWeatherRepository = regionalCitiesWeatherRepository;
+    public RegionalWeatherService(RegionalCityRepository regionalCitiesRepository, RegionalCityWeatherRepository regionalCityWeatherRepository, WeatherService weatherService) {
+        this.regionalCityRepository = regionalCitiesRepository;
+        this.regionalCityWeatherRepository = regionalCityWeatherRepository;
         this.weatherService = weatherService;
     }
     @Scheduled(cron = "0 0 * * * *")
     public void hourlyRegionalCitiesWeatherUpdate() throws IOException {
-        List<RegionalCities> cities = regionalCitiesRepository.findAll();
-        for (RegionalCities city : cities) {
+        List<RegionalCity> cities = regionalCityRepository.findAll();
+        for (RegionalCity city : cities) {
             String response = weatherService.fetchData(city.getLat(), city.getLon());
             WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
 
-            RegionalCitiesWeather regionalCitiesWeather = new RegionalCitiesWeather();
-            if (city.getRegionalCitiesWeather() != null) {
-                regionalCitiesWeather = regionalCitiesWeatherRepository.findById(city.getRegionalCitiesWeather().getId())
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCitiesWeather().getId()));
+            RegionalCityWeather regionalCityWeather = new RegionalCityWeather();
+            if (city.getRegionalCityWeather() != null) {
+                regionalCityWeather = regionalCityWeatherRepository.findById(city.getRegionalCityWeather().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCityWeather().getId()));
             }
 
-            regionalCitiesWeather.setTemperature(weatherData.getMain().getTemp());
-            regionalCitiesWeather.setDescription(weatherData.getWeather()[0].getDescription());
-            regionalCitiesWeather.setSunrise(UnixTimeConverter.converter(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
-            regionalCitiesWeather.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
-            regionalCitiesWeather.setUpdatedAt(LocalDateTime.now());
-            city.setRegionalCitiesWeather(regionalCitiesWeather);
-            regionalCitiesWeather.setRegionalCities(city);
-            regionalCitiesWeatherRepository.save(regionalCitiesWeather);
-            regionalCitiesRepository.save(city);
+            regionalCityWeather.setTemperature(weatherData.getMain().getTemp());
+            regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
+            regionalCityWeather.setSunrise(UnixTimeConverter.converter(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
+            regionalCityWeather.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+            regionalCityWeather.setUpdatedAt(LocalDateTime.now());
+            city.setRegionalCityWeather(regionalCityWeather);
+            regionalCityWeather.setRegionalCity(city);
+            regionalCityWeatherRepository.save(regionalCityWeather);
+            regionalCityRepository.save(city);
         }
     }
 }
