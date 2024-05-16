@@ -70,4 +70,10 @@ public class WeatherController {
         weatherService.processGeolocationData(response);
         return ResponseEntity.status(200).build();
     }
+
+    @GetMapping("/test4")
+    public ResponseEntity<?> test4(@RequestParam String lat, @RequestParam String lon) throws IOException {
+        String response = weatherService.fetchForecastData(lat, lon);
+        return ResponseEntity.status(200).body(weatherService.processForecastData(response));
+    }
 }
