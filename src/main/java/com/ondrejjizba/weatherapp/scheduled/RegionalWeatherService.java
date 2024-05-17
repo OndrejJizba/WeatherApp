@@ -2,8 +2,12 @@ package com.ondrejjizba.weatherapp.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
+import com.ondrejjizba.weatherapp.models.ForecastEntity;
 import com.ondrejjizba.weatherapp.models.RegionalCity;
+import com.ondrejjizba.weatherapp.models.RegionalCityForecast;
 import com.ondrejjizba.weatherapp.models.RegionalCityWeather;
+import com.ondrejjizba.weatherapp.repositories.ForecastRepository;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityForecastRepository;
 import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
 import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
 import com.ondrejjizba.weatherapp.services.WeatherService;
@@ -23,13 +27,17 @@ import java.util.List;
 public class RegionalWeatherService {
     private final RegionalCityRepository regionalCityRepository;
     private final RegionalCityWeatherRepository regionalCityWeatherRepository;
+    private final RegionalCityForecastRepository regionalCityForecastRepository;
+    private final ForecastRepository forecastRepository;
     private final WeatherService weatherService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public RegionalWeatherService(RegionalCityRepository regionalCitiesRepository, RegionalCityWeatherRepository regionalCityWeatherRepository, WeatherService weatherService) {
+    public RegionalWeatherService(RegionalCityRepository regionalCitiesRepository, RegionalCityWeatherRepository regionalCityWeatherRepository, RegionalCityForecastRepository regionalCityForecastRepository, ForecastRepository forecastRepository, WeatherService weatherService) {
         this.regionalCityRepository = regionalCitiesRepository;
         this.regionalCityWeatherRepository = regionalCityWeatherRepository;
+        this.regionalCityForecastRepository = regionalCityForecastRepository;
+        this.forecastRepository = forecastRepository;
         this.weatherService = weatherService;
     }
     @Scheduled(cron = "0 0 * * * *")
@@ -47,8 +55,8 @@ public class RegionalWeatherService {
 
             regionalCityWeather.setTemperature(weatherData.getMain().getTemp());
             regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
-            regionalCityWeather.setSunrise(UnixTimeConverter.converter(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
-            regionalCityWeather.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+            regionalCityWeather.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
+            regionalCityWeather.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
             regionalCityWeather.setUpdatedAt(LocalDateTime.now());
             city.setRegionalCityWeather(regionalCityWeather);
             regionalCityWeather.setRegionalCity(city);
@@ -56,4 +64,23 @@ public class RegionalWeatherService {
             regionalCityRepository.save(city);
         }
     }
-}
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void dailyRegionalCitiesForecastUpdate() throws IOException {
+        regionalCityForecastRepository.deleteAll();
+        List<RegionalCity> cities = regionalCityRepository.findAll();
+        for (RegionalCity city : cities) {
+            String response = weatherService.fetchForecastData(city.getLat(), city.getLon());
+            List<ForecastEntity> forecasts = weatherService.processForecastData(response);
+            for (ForecastEntity forecast : forecasts) {
+                RegionalCityForecast regionalCityForecast = new RegionalCityForecast();
+                regionalCityForecast.setTime(UnixTimeConverter.converterDayTime(forecast.getDt(), forecast.getTimezone()));
+                regionalCityForecast.setDescription(forecast.getDescription());
+                regionalCityForecast.setTemperature(forecast.getTemp());
+                regionalCityForecast.setRegionalCity(city);
+                regionalCityForecastRepository.save(regionalCityForecast);
+            }
+            forecastRepository.deleteAll();
+            }
+        }
+    }

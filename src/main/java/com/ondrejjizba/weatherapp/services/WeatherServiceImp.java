@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ondrejjizba.weatherapp.models.DTOs.ForecastData;
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
+import com.ondrejjizba.weatherapp.models.ForecastEntity;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
+import com.ondrejjizba.weatherapp.repositories.ForecastRepository;
 import com.ondrejjizba.weatherapp.repositories.WeatherRepository;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -29,10 +30,13 @@ public class WeatherServiceImp implements WeatherService{
     private static final String API_KEY = System.getenv("API_KEY");
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WeatherRepository weatherRepository;
+    private final ForecastRepository forecastRepository;
 
     @Autowired
-    public WeatherServiceImp(WeatherRepository weatherRepository) {
+    public WeatherServiceImp(WeatherRepository weatherRepository,
+                             ForecastRepository forecastRepository) {
         this.weatherRepository = weatherRepository;
+        this.forecastRepository = forecastRepository;
     }
 
     @Override
@@ -49,8 +53,8 @@ public class WeatherServiceImp implements WeatherService{
         weatherEntity.setName(weatherData.getName());
         weatherEntity.setDescription(weatherData.getWeather()[0].getDescription());
         weatherEntity.setTemperature(weatherData.getMain().getTemp());
-        weatherEntity.setSunrise(UnixTimeConverter.converter(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
-        weatherEntity.setSunset(UnixTimeConverter.converter(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+        weatherEntity.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
+        weatherEntity.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
         weatherRepository.save(weatherEntity);
         return weatherEntity;
     }
@@ -86,21 +90,23 @@ public class WeatherServiceImp implements WeatherService{
     }
 
     @Override
-    public List<ForecastData> processForecastData(String response) throws JsonProcessingException {
-        List<ForecastData> forecastResponse = new ArrayList<>();
+    public List<ForecastEntity> processForecastData(String response) throws JsonProcessingException {
+        List<ForecastEntity> forecastResponse = new ArrayList<>();
         JsonNode rootNode = objectMapper.readTree(response);
         JsonNode listNode = rootNode.get("list");
         if (listNode != null && listNode.isArray()) {
             Iterator<JsonNode> elements = listNode.elements();
             while (elements.hasNext()) {
                 JsonNode item = elements.next();
-                ForecastData forecast = new ForecastData();
+                ForecastEntity forecast = new ForecastEntity();
                 forecast.setDt(item.get("dt").asLong());
                 forecast.setTemp(item.get("main").get("temp").asDouble());
                 forecast.setDescription(item.get("weather").get(0).get("description").asText());
+                forecast.setTimezone(rootNode.get("city").get("timezone").asLong());
                 forecastResponse.add(forecast);
             }
         }
+        forecastRepository.saveAll(forecastResponse);
         return forecastResponse;
     }
 }

@@ -76,4 +76,10 @@ public class WeatherController {
         String response = weatherService.fetchForecastData(lat, lon);
         return ResponseEntity.status(200).body(weatherService.processForecastData(response));
     }
+
+    @GetMapping("test5")
+    public ResponseEntity<?> test5() throws IOException {
+        regionalWeatherService.dailyRegionalCitiesForecastUpdate();
+        return ResponseEntity.status(200).build();
+    }
 }
