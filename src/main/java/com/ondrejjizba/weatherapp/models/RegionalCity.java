@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -18,4 +20,6 @@ public class RegionalCity {
     private String lon;
     @OneToOne(fetch = FetchType.LAZY)
     private RegionalCityWeather regionalCityWeather;
+    @OneToMany (cascade = CascadeType.ALL, mappedBy = "regionalCity")
+    private List<RegionalCityForecast> forecast;
 }

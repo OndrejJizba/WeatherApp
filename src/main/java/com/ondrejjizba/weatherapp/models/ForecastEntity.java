@@ -1,23 +1,23 @@
 package com.ondrejjizba.weatherapp.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegionalCityForecast {
+public class ForecastEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String time;
-    private double temperature;
+    private long dt;
+    private double temp;
     private String description;
-    @ManyToOne
-    private RegionalCity regionalCity;
+    private Long timezone;
 }
