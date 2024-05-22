@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 public class WeatherController {
@@ -62,12 +63,15 @@ public class WeatherController {
 
     @GetMapping("/city/{id}")
     public ResponseEntity<?> listRegionalCitiesWeather(@PathVariable Long id) throws Exception {
-        RegionalCity regionalCity = regionalCityRepository.findById(id).orElseThrow(() -> new Exception("Cannot find city with given id."));
+        Optional<RegionalCity> regionalCityOptional = regionalCityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
-        if (id > regionalCityRepository.findAll().size()) {
+        if(regionalCityOptional.isEmpty()) {
             result.put("error", "City with given ID doesn't exist.");
             return ResponseEntity.status(400).body(result);
-        } else if (regionalCityWeatherRepository.findAll().isEmpty()) {
+        }
+
+        RegionalCity regionalCity = regionalCityOptional.get();
+        if (regionalCityWeatherRepository.findAll().isEmpty()) {
             regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
         }
         result.put("city", regionalCity.getCity());
