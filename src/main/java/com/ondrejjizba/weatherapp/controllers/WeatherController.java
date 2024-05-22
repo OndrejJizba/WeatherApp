@@ -1,7 +1,10 @@
 package com.ondrejjizba.weatherapp.controllers;
 
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
+import com.ondrejjizba.weatherapp.models.RegionalCity;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
 import com.ondrejjizba.weatherapp.scheduled.RegionalWeatherService;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -11,6 +14,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,10 +27,17 @@ import java.util.Map;
 public class WeatherController {
     private final WeatherService weatherService;
     private final RegionalWeatherService regionalWeatherService;
+    private final RegionalCityRepository regionalCityRepository;
+    private final RegionalCityWeatherRepository regionalCityWeatherRepository;
+
     @Autowired
-    public WeatherController(WeatherService weatherService, RegionalWeatherService regionalWeatherService) {
+    public WeatherController(WeatherService weatherService, RegionalWeatherService regionalWeatherService,
+                             RegionalCityRepository regionalCityRepository,
+                             RegionalCityWeatherRepository regionalCityWeatherRepository) {
         this.weatherService = weatherService;
         this.regionalWeatherService = regionalWeatherService;
+        this.regionalCityRepository = regionalCityRepository;
+        this.regionalCityWeatherRepository = regionalCityWeatherRepository;
     }
 
     @GetMapping("/weather")
@@ -49,9 +60,28 @@ public class WeatherController {
         return ResponseEntity.status(200).body(geolocationData);
     }
 
+    @GetMapping("/city/{id}")
+    public ResponseEntity<?> listRegionalCitiesWeather(@PathVariable Long id) throws Exception {
+        RegionalCity regionalCity = regionalCityRepository.findById(id).orElseThrow(() -> new Exception("Cannot find city with given id."));
+        Map<String, Object> result = new HashMap<>();
+        if (id > regionalCityRepository.findAll().size()) {
+            result.put("error", "City with given ID doesn't exist.");
+            return ResponseEntity.status(400).body(result);
+        } else if (regionalCityWeatherRepository.findAll().isEmpty()) {
+            regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
+        }
+        result.put("city", regionalCity.getCity());
+        result.put("temperature", regionalCity.getRegionalCityWeather().getTemperature());
+        result.put("description", regionalCity.getRegionalCityWeather().getDescription());
+        result.put("sunrise", regionalCity.getRegionalCityWeather().getSunrise());
+        result.put("sunset", regionalCity.getRegionalCityWeather().getSunset());
+        result.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
+        return ResponseEntity.status(200).body(result);
+    }
+
     @GetMapping("test")
     public ResponseEntity<?> test(@RequestParam String lat, @RequestParam String lon) throws IOException {
-        String apiKey = "5ca9d598d2838310f457258b0c48720c";
+        String apiKey = System.getenv("API_KEY");
         HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/weather?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey);
         CloseableHttpClient client = HttpClients.createDefault();
         String response = client.execute(request, new BasicHttpClientResponseHandler());
