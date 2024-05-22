@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class WeatherController {
@@ -65,7 +62,7 @@ public class WeatherController {
     public ResponseEntity<?> listRegionalCitiesWeather(@PathVariable Long id) throws Exception {
         Optional<RegionalCity> regionalCityOptional = regionalCityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
-        if(regionalCityOptional.isEmpty()) {
+        if (regionalCityOptional.isEmpty()) {
             result.put("error", "City with given ID doesn't exist.");
             return ResponseEntity.status(400).body(result);
         }
@@ -82,6 +79,30 @@ public class WeatherController {
         result.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
         return ResponseEntity.status(200).body(result);
     }
+
+    @GetMapping("/cities")
+    public ResponseEntity<?> listAllCitiesWeather() throws IOException {
+        if (regionalCityWeatherRepository.findAll().isEmpty()) {
+            regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
+        }
+
+        List<RegionalCity> regionalCities = regionalCityRepository.findAll();
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (RegionalCity regionalCity : regionalCities) {
+            Map<String, Object> cityWeather = new HashMap<>();
+            cityWeather.put("city", regionalCity.getCity());
+            cityWeather.put("temperature", regionalCity.getRegionalCityWeather().getTemperature());
+            cityWeather.put("description", regionalCity.getRegionalCityWeather().getDescription());
+            cityWeather.put("sunrise", regionalCity.getRegionalCityWeather().getSunrise());
+            cityWeather.put("sunset", regionalCity.getRegionalCityWeather().getSunset());
+            cityWeather.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
+            result.add(cityWeather);
+        }
+
+        return ResponseEntity.status(200).body(result);
+    }
+
 
     @GetMapping("test")
     public ResponseEntity<?> test(@RequestParam String lat, @RequestParam String lon) throws IOException {
