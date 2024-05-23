@@ -46,11 +46,19 @@ const WeatherList = () => {
     <div className="container">
       {weatherData.map((cityWeather, index) => (
         <div className="card" key={index}>
-          <h1>{cityWeather.city}</h1>
-          <p>{cityWeather.temperature}°C</p>
-          <p>{cityWeather.description}</p>
-          <p>Sunrise: {cityWeather.sunrise}</p>
-          <p>Sunset: {cityWeather.sunset}</p>
+          <div
+            className="card-image"
+            style={{
+              backgroundImage: `url(http://localhost:8080${cityWeather.picture})`
+            }}
+          ></div>
+          <div className="card-content">
+            <h1>{cityWeather.city}</h1>
+            <p>{cityWeather.temperature}°C</p>
+            <p>{cityWeather.description}</p>
+            <p>Sunrise: {cityWeather.sunrise}</p>
+            <p>Sunset: {cityWeather.sunset}</p>
+          </div>
         </div>
       ))}
       <div className="last-updated">Last updated: {lastUpdated}</div>

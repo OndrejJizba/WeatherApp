@@ -7,15 +7,52 @@
 }
 
 .card {
-  background-color: #f0f4f8;
+  position: relative;
   border: 1px solid #d0d7de;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: calc(300px - 40px); /* Pevná šířka karet s okrajem */
-  text-align: center;
+  width: 300px;
   box-sizing: border-box;
-  margin: 20px; /* Okraje kolem karet */
+  overflow: hidden;
+  margin: 20px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.3s ease-in-out; /* Add transition for smooth effect */
+}
+
+.card:hover {
+  opacity: 1; /* Make the card fully opaque on hover */
+}
+
+.card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.3; /* Initial opacity */
+  transition: opacity 0.3s ease-in-out; /* Transition effect for smooth opacity change */
+}
+
+.card:hover .card-image {
+  opacity: 1; /* Full opacity on hover */
+}
+
+.card-content {
+  position: relative;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.6
+  ); /* Slightly transparent background for the content */
+  border-radius: 10px;
+  padding: 20px;
+  z-index: 1;
+  text-align: center;
 }
 
 .card h1 {
