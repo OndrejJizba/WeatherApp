@@ -40,6 +40,7 @@ public class RegionalWeatherService {
         this.forecastRepository = forecastRepository;
         this.weatherService = weatherService;
     }
+
     @Scheduled(cron = "0 0 * * * *")
     public void hourlyRegionalCitiesWeatherUpdate() throws IOException {
         List<RegionalCity> cities = regionalCityRepository.findAll();
@@ -53,6 +54,8 @@ public class RegionalWeatherService {
                         .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCityWeather().getId()));
             }
 
+            if (city.getPicture() == null) setPicturePath(city);
+
             regionalCityWeather.setTemperature(weatherData.getMain().getTemp());
             regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
             regionalCityWeather.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
@@ -63,6 +66,12 @@ public class RegionalWeatherService {
             regionalCityWeatherRepository.save(regionalCityWeather);
             regionalCityRepository.save(city);
         }
+    }
+
+    private void setPicturePath(RegionalCity city) {
+        Long cityId = city.getId();
+        String picturePath = "/images/" + cityId + ".jpg";
+        city.setPicture(picturePath);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
@@ -81,6 +90,6 @@ public class RegionalWeatherService {
                 regionalCityForecastRepository.save(regionalCityForecast);
             }
             forecastRepository.deleteAll();
-            }
         }
     }
+}

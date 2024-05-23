@@ -96,6 +96,7 @@ public class WeatherController {
             cityWeather.put("description", regionalCity.getRegionalCityWeather().getDescription());
             cityWeather.put("sunrise", regionalCity.getRegionalCityWeather().getSunrise());
             cityWeather.put("sunset", regionalCity.getRegionalCityWeather().getSunset());
+            cityWeather.put("picture", regionalCity.getPicture());
             cityWeather.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
             result.add(cityWeather);
         }

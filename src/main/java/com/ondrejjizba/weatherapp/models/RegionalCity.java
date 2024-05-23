@@ -18,6 +18,7 @@ public class RegionalCity {
     private String city;
     private String lat;
     private String lon;
+    private String picture;
     @OneToOne(fetch = FetchType.LAZY)
     private RegionalCityWeather regionalCityWeather;
     @OneToMany (cascade = CascadeType.ALL, mappedBy = "regionalCity")
