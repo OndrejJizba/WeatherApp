@@ -83,3 +83,9 @@
   text-align: center;
   width: 100%;
 }
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}

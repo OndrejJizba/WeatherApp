@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import "./WeatherList.css";
 
 const WeatherList = () => {
@@ -44,22 +45,28 @@ const WeatherList = () => {
 
   return (
     <div className="container">
-      {weatherData.map((cityWeather, index) => (
-        <div className="card" key={index}>
-          <div
-            className="card-image"
-            style={{
-              backgroundImage: `url(http://localhost:8080${cityWeather.picture})`
-            }}
-          ></div>
-          <div className="card-content">
-            <h1>{cityWeather.city}</h1>
-            <p>{cityWeather.temperature}°C</p>
-            <p>{cityWeather.description}</p>
-            <p>Sunrise: {cityWeather.sunrise}</p>
-            <p>Sunset: {cityWeather.sunset}</p>
+      {weatherData.map((cityWeather) => (
+        <Link
+          to={`/weather/${cityWeather.id}`}
+          key={cityWeather.id}
+          className="card-link"
+        >
+          <div className="card">
+            <div
+              className="card-image"
+              style={{
+                backgroundImage: `url(http://localhost:8080${cityWeather.picture})`,
+              }}
+            ></div>
+            <div className="card-content">
+              <h1>{cityWeather.city}</h1>
+              <p>{cityWeather.temperature}°C</p>
+              <p>{cityWeather.description}</p>
+              <p>Sunrise: {cityWeather.sunrise}</p>
+              <p>Sunset: {cityWeather.sunset}</p>
+            </div>
           </div>
-        </div>
+        </Link>
       ))}
       <div className="last-updated">Last updated: {lastUpdated}</div>
     </div>
