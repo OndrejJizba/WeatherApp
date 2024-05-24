@@ -2,7 +2,9 @@ package com.ondrejjizba.weatherapp.controllers;
 
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.RegionalCity;
+import com.ondrejjizba.weatherapp.models.RegionalCityForecast;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
+import com.ondrejjizba.weatherapp.repositories.RegionalCityForecastRepository;
 import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
 import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
 import com.ondrejjizba.weatherapp.scheduled.RegionalWeatherService;
@@ -27,15 +29,18 @@ public class WeatherController {
     private final RegionalWeatherService regionalWeatherService;
     private final RegionalCityRepository regionalCityRepository;
     private final RegionalCityWeatherRepository regionalCityWeatherRepository;
+    private final RegionalCityForecastRepository regionalCityForecastRepository;
 
     @Autowired
     public WeatherController(WeatherService weatherService, RegionalWeatherService regionalWeatherService,
                              RegionalCityRepository regionalCityRepository,
-                             RegionalCityWeatherRepository regionalCityWeatherRepository) {
+                             RegionalCityWeatherRepository regionalCityWeatherRepository,
+                             RegionalCityForecastRepository regionalCityForecastRepository) {
         this.weatherService = weatherService;
         this.regionalWeatherService = regionalWeatherService;
         this.regionalCityRepository = regionalCityRepository;
         this.regionalCityWeatherRepository = regionalCityWeatherRepository;
+        this.regionalCityForecastRepository = regionalCityForecastRepository;
     }
 
     @GetMapping("/weather")
@@ -98,9 +103,31 @@ public class WeatherController {
             cityWeather.put("sunset", regionalCity.getRegionalCityWeather().getSunset());
             cityWeather.put("picture", regionalCity.getPicture());
             cityWeather.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
+            cityWeather.put("id", regionalCity.getId());
             result.add(cityWeather);
         }
 
+        return ResponseEntity.status(200).body(result);
+    }
+
+    @GetMapping("/forecast/{id}")
+    public ResponseEntity<?> getForecastByCity(@PathVariable Long id) throws IOException {
+        Optional<RegionalCity> regionalCityOptional = regionalCityRepository.findById(id);
+        Map<String, Object> result = new HashMap<>();
+        if (regionalCityOptional.isEmpty()) {
+            result.put("error", "City with given ID doesn't exist.");
+            return ResponseEntity.status(400).body(result);
+        }
+
+        RegionalCity regionalCity = regionalCityOptional.get();
+        if (regionalCityForecastRepository.findAll().isEmpty()) {
+            regionalWeatherService.dailyRegionalCitiesForecastUpdate();
+        }
+
+        List<RegionalCityForecast> forecast = regionalCityForecastRepository.findAllByRegionalCityId(id);
+
+        result.put("city", regionalCity.getCity());
+        result.put("forecast", forecast);
         return ResponseEntity.status(200).body(result);
     }
 

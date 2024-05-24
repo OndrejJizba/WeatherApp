@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,6 @@ public class RegionalCityForecast {
     private double temperature;
     private String description;
     @ManyToOne
+    @JsonIgnore
     private RegionalCity regionalCity;
 }
