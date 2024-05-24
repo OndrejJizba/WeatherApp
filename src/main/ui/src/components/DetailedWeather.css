@@ -1,0 +1,48 @@
+.loading {
+  text-align: center;
+  font-size: 1.5em;
+  margin-top: 2em;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.table-custom {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-custom th,
+.table-custom td {
+  padding: 16px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table-custom th {
+  background-color: #343a40;
+  color: #fff;
+  font-weight: bold;
+}
+
+.table-custom td {
+  background-color: #f8f9fa;
+}
+
+.table-custom tr:hover td {
+  background-color: #e9ecef;
+}
+
+.table-custom td div {
+  margin-bottom: 4px;
+  font-size: 0.9em;
+}
+
+.text-center {
+  text-align: center;
+}
