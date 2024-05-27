@@ -70,16 +70,25 @@ public class WeatherServiceImp implements WeatherService{
     }
 
     @Override
-    public String fetchGeolocationData(String cityName) throws IOException {
+    public String fetchGeolocationData(String cityName) {
         String encodedCityName = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
         HttpGet request = new HttpGet("http://api.openweathermap.org/geo/1.0/direct?q=" + encodedCityName + "&limit=5&appid=" + API_KEY);
         CloseableHttpClient client = HttpClients.createDefault();
-        return client.execute(request, new BasicHttpClientResponseHandler());
+        try {
+            return client.execute(request, new BasicHttpClientResponseHandler());
+        } catch (IOException e) {
+            throw new CityNotFoundException("City with given name doesn't exist.");
+        }
     }
 
     @Override
     public List<GeolocationData> processGeolocationData(String response) throws JsonProcessingException {
         List<GeolocationData> geolocationData = objectMapper.readValue(response, new TypeReference<>() {});
+
+        if (geolocationData.isEmpty()) {
+            throw new CityNotFoundException("City with given name doesn't exist.");
+        }
+
         List<GeolocationData> geolocationResponse = new ArrayList<>();
         for (GeolocationData data : geolocationData) {
             GeolocationData geoResp = new GeolocationData();

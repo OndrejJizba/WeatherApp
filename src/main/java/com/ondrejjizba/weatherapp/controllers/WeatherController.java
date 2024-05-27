@@ -45,7 +45,7 @@ public class WeatherController {
     }
 
     @GetMapping("/weather")
-    public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) throws IOException {
+    public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) {
         try {
             String response = weatherService.fetchWeatherData(lat, lon);
             WeatherEntity weatherEntity = weatherService.processWeatherData(response);
@@ -64,10 +64,16 @@ public class WeatherController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchByName(@RequestParam String name) throws IOException {
-        String response = weatherService.fetchGeolocationData(name);
-        List<GeolocationData> geolocationData = weatherService.processGeolocationData(response);
-        return ResponseEntity.status(200).body(geolocationData);
+    public ResponseEntity<?> searchByName(@RequestParam String name) {
+        try {
+            String response = weatherService.fetchGeolocationData(name);
+            List<GeolocationData> geolocationData = weatherService.processGeolocationData(response);
+            return ResponseEntity.status(200).body(geolocationData);
+        } catch (CityNotFoundException e) {
+            return ResponseEntity.status(404).body("City with given name doesn't exist.");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error fetching geolocation data.");
+        }
     }
 
     @GetMapping("/city/{id}")
