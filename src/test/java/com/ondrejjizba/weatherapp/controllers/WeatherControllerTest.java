@@ -1,6 +1,5 @@
 package com.ondrejjizba.weatherapp.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ondrejjizba.weatherapp.repositories.WeatherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ class WeatherControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
     @Autowired
     private WeatherRepository weatherRepository;
 
@@ -58,5 +56,36 @@ class WeatherControllerTest {
                 .andExpect(content().string("City not found for given coordinates."));
 
         assertEquals(initialWeatherRepoSize, weatherRepository.findAll().size());
+    }
+
+    @Test
+    void searchByNameSuccessfulOneResult() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/search")
+                        .param("name", "Brno"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$[0].name", is("Brno")))
+                .andExpect(jsonPath("$[0].country", is("CZ")))
+                .andExpect(jsonPath("$[0].lat", notNullValue()))
+                .andExpect(jsonPath("$[0].lon", notNullValue()));
+    }
+
+    @Test
+    void searchByNameSuccessfulMoreResults() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/search")
+                        .param("name", "Prague"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$[0].name", is("Prague")))
+                .andExpect(jsonPath("$[4].name", is("Prague")))
+                .andExpect(jsonPath("$[1].lat", notNullValue()))
+                .andExpect(jsonPath("$[2].lon", notNullValue()))
+                .andExpect(jsonPath("$[3].country", notNullValue()));
+    }
+
+    @Test
+    void searchByNameCityNotFoundException() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/search")
+                .param("name", "qwertzuiop"))
+                .andExpect(status().is(404))
+                .andExpect(content().string("City with given name doesn't exist."));
     }
 }
