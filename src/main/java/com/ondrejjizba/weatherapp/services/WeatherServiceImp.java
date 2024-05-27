@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ondrejjizba.weatherapp.exceptions.CityNotFoundException;
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
 import com.ondrejjizba.weatherapp.models.ForecastEntity;
@@ -40,15 +41,24 @@ public class WeatherServiceImp implements WeatherService{
     }
 
     @Override
-    public String fetchWeatherData(String lat, String lon) throws IOException {
-        HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/weather?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY);
-        CloseableHttpClient client = HttpClients.createDefault();
-        return client.execute(request, new BasicHttpClientResponseHandler());
+    public String fetchWeatherData(String lat, String lon) {
+            HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/weather?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY);
+            CloseableHttpClient client = HttpClients.createDefault();
+        try {
+            return client.execute(request, new BasicHttpClientResponseHandler());
+        } catch (IOException e) {
+            throw new CityNotFoundException("City not found for given coordinates.");
+        }
     }
 
     @Override
     public WeatherEntity processWeatherData(String response) throws JsonProcessingException {
         WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
+
+        if (weatherData.getName() == null || weatherData.getName().isEmpty()) {
+            throw new CityNotFoundException("City not found for given coordinates.");
+        }
+
         WeatherEntity weatherEntity = new WeatherEntity();
         weatherEntity.setName(weatherData.getName());
         weatherEntity.setDescription(weatherData.getWeather()[0].getDescription());

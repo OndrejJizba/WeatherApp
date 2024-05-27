@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.controllers;
 
+import com.ondrejjizba.weatherapp.exceptions.CityNotFoundException;
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
 import com.ondrejjizba.weatherapp.models.RegionalCity;
 import com.ondrejjizba.weatherapp.models.RegionalCityForecast;
@@ -45,15 +46,21 @@ public class WeatherController {
 
     @GetMapping("/weather")
     public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) throws IOException {
-        String response = weatherService.fetchWeatherData(lat, lon);
-        WeatherEntity weatherEntity = weatherService.processWeatherData(response);
-        Map<String, Object> result = new HashMap<>();
-        result.put("name", weatherEntity.getName());
-        result.put("description", weatherEntity.getDescription());
-        result.put("temperature", weatherEntity.getTemperature());
-        result.put("sunrise", weatherEntity.getSunrise());
-        result.put("sunset", weatherEntity.getSunset());
-        return ResponseEntity.status(200).body(result);
+        try {
+            String response = weatherService.fetchWeatherData(lat, lon);
+            WeatherEntity weatherEntity = weatherService.processWeatherData(response);
+            Map<String, Object> result = new HashMap<>();
+            result.put("name", weatherEntity.getName());
+            result.put("description", weatherEntity.getDescription());
+            result.put("temperature", weatherEntity.getTemperature());
+            result.put("sunrise", weatherEntity.getSunrise());
+            result.put("sunset", weatherEntity.getSunset());
+            return ResponseEntity.status(200).body(result);
+        } catch (CityNotFoundException e) {
+            return ResponseEntity.status(404).body("City not found for given coordinates.");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error fetching weather data.");
+        }
     }
 
     @GetMapping("/search")
