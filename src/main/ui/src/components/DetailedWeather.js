@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./DetailedWeather.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const DetailedWeather = () => {
   const { id } = useParams();
@@ -39,14 +39,18 @@ const DetailedWeather = () => {
   }
 
   if (!forecastData) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   const groupedData = groupByDate(forecastData.forecast);
 
   return (
     <div className="container mt-4">
-      <h1 className="text-center">{forecastData.city} - 5 Day Forecast</h1>
+      <h1 className="text-center">{forecastData.city}</h1>
       <table className="table table-hover table-custom mt-3">
         <thead className="thead-dark">
           <tr>
@@ -65,8 +69,19 @@ const DetailedWeather = () => {
           {Object.keys(groupedData).map((date) => (
             <tr key={date}>
               <td>{date}</td>
-              {["02:00", "05:00", "08:00", "11:00", "14:00", "17:00", "20:00", "23:00"].map((time) => {
-                const forecast = groupedData[date].find(f => f.time.includes(time));
+              {[
+                "02:00",
+                "05:00",
+                "08:00",
+                "11:00",
+                "14:00",
+                "17:00",
+                "20:00",
+                "23:00",
+              ].map((time) => {
+                const forecast = groupedData[date].find((f) =>
+                  f.time.includes(time)
+                );
                 return (
                   <td key={time}>
                     {forecast ? (
