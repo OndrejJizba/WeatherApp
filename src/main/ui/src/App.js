@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import axios from "axios";
 import WeatherList from "./components/WeatherList";
 import DetailedWeather from "./components/DetailedWeather";
-import SearchBar2 from "./components/SearchBar";
 import SearchBar from "./components/SearchBar";
+import Forecast from "./components/Forecast";
 
 const App = () => {
   const [weatherData, setWeatherData] = useState([]);
@@ -31,6 +31,7 @@ const App = () => {
           }
         />
         <Route path="/weather/:id" element={<DetailedWeather />} />
+        <Route path="/forecast/:lat/:lon" element={<Forecast />} />
       </Routes>
     </Router>
   );
