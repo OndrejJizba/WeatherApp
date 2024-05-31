@@ -128,4 +128,24 @@ public class WeatherServiceImp implements WeatherService{
         forecastRepository.saveAll(forecastResponse);
         return forecastResponse;
     }
+
+    @Override
+    public List<ForecastEntity> processForecastDataNoSave(String response) throws JsonProcessingException {
+        List<ForecastEntity> forecastResponse = new ArrayList<>();
+        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode listNode = rootNode.get("list");
+        if (listNode != null && listNode.isArray()) {
+            Iterator<JsonNode> elements = listNode.elements();
+            while (elements.hasNext()) {
+                JsonNode item = elements.next();
+                ForecastEntity forecast = new ForecastEntity();
+                forecast.setDt(item.get("dt").asLong());
+                forecast.setTemp(item.get("main").get("temp").asDouble());
+                forecast.setDescription(item.get("weather").get(0).get("description").asText());
+                forecast.setTimezone(rootNode.get("city").get("timezone").asLong());
+                forecastResponse.add(forecast);
+            }
+        }
+        return forecastResponse;
+    }
 }

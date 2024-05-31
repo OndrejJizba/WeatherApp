@@ -2,6 +2,7 @@ package com.ondrejjizba.weatherapp.controllers;
 
 import com.ondrejjizba.weatherapp.exceptions.CityNotFoundException;
 import com.ondrejjizba.weatherapp.models.DTOs.GeolocationData;
+import com.ondrejjizba.weatherapp.models.ForecastEntity;
 import com.ondrejjizba.weatherapp.models.RegionalCity;
 import com.ondrejjizba.weatherapp.models.RegionalCityForecast;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
@@ -142,6 +143,13 @@ public class WeatherController {
         result.put("city", regionalCity.getCity());
         result.put("forecast", forecast);
         return ResponseEntity.status(200).body(result);
+    }
+
+    @GetMapping("/forecast")
+    public ResponseEntity<?> getForecast(@RequestParam String lat, @RequestParam String lon) throws IOException {
+        String response = weatherService.fetchForecastData(lat, lon);
+        List<ForecastEntity> forecast = weatherService.processForecastDataNoSave(response);
+        return ResponseEntity.status(200).body(forecast);
     }
 
 

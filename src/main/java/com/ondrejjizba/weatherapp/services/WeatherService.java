@@ -16,4 +16,5 @@ public interface WeatherService {
     List<GeolocationData> processGeolocationData(String response) throws JsonProcessingException;
     String fetchForecastData(String lat, String lon) throws IOException;
     List<ForecastEntity> processForecastData(String response) throws JsonProcessingException;
+    List<ForecastEntity> processForecastDataNoSave(String response) throws JsonProcessingException;
 }
