@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "./SearchBar.css";
 
 function SearchBar() {
@@ -8,16 +9,17 @@ function SearchBar() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     setSearchResults([]);
+    setSelectedLocation(null);
     setError(null);
     setLoading(true);
     try {
       const response = await axios.get(`/search?name=${searchTerm}`);
       if (response.data.length > 0) {
         setSearchResults(response.data);
-        setSelectedLocation(null);
       } else {
         setError(`${searchTerm} doesn't exist.`);
       }
@@ -44,6 +46,12 @@ function SearchBar() {
       setError("Error fetching current weather. Please try again later.");
     }
     setLoading(false);
+  };
+
+  const handleCardClick = () => {
+    if (selectedLocation) {
+      navigate(`/forecast/${selectedLocation.lat}/${selectedLocation.lon}`);
+    }
   };
 
   return (
@@ -74,7 +82,7 @@ function SearchBar() {
       </ul>
 
       {selectedLocation && selectedLocation.weather && (
-        <div className="selected-location">
+        <div className="selected-location" onClick={handleCardClick}>
           <h2>
             {selectedLocation.name}, {selectedLocation.country}
           </h2>
@@ -82,6 +90,7 @@ function SearchBar() {
           <p>{selectedLocation.weather.description}</p>
           <p>Sunrise: {selectedLocation.weather.sunrise}</p>
           <p>Sunset: {selectedLocation.weather.sunset}</p>
+          <p className="forecast-link">Click for forecast</p>
         </div>
       )}
     </div>
