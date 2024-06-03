@@ -62,8 +62,14 @@ const WeatherList = () => {
               <h1>{cityWeather.city}</h1>
               <p>{cityWeather.temperature}°C</p>
               <p>{cityWeather.description}</p>
-              <p>Sunrise: {cityWeather.sunrise}</p>
-              <p>Sunset: {cityWeather.sunset}</p>
+              <p>
+                <img src="/icons/sunrise.png" alt="Sunrise" className="icon" />{" "}
+                {cityWeather.sunrise}
+              </p>
+              <p>
+                <img src="/icons/sunset.png" alt="Sunset" className="icon" />{" "}
+                {cityWeather.sunset}
+              </p>
             </div>
           </div>
         </Link>

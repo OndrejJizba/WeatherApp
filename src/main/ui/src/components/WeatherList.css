@@ -43,12 +43,7 @@
 
 .card-content {
   position: relative;
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.6
-  );
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 10px;
   padding: 20px;
   z-index: 1;
@@ -63,6 +58,12 @@
 .card p {
   font-size: 1em;
   margin: 5px 0;
+}
+
+.icon {
+  width: 1.5em;
+  height: 1.5em;
+  vertical-align: middle;
 }
 
 .error {

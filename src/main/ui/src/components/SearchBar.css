@@ -106,3 +106,9 @@
   color: rgb(179, 168, 168);
   margin-top: 10px;
 }
+
+.icon {
+  width: 1.5em;
+  height: 1.5em;
+  vertical-align: middle;
+}

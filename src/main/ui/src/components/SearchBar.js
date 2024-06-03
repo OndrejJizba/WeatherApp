@@ -88,8 +88,14 @@ function SearchBar() {
           </h2>
           <p>{selectedLocation.weather.temperature}°C</p>
           <p>{selectedLocation.weather.description}</p>
-          <p>Sunrise: {selectedLocation.weather.sunrise}</p>
-          <p>Sunset: {selectedLocation.weather.sunset}</p>
+          <p>
+            <img src="/icons/sunrise.png" alt="Sunrise" className="icon" />{" "}
+            {selectedLocation.weather.sunrise}
+          </p>
+          <p>
+            <img src="/icons/sunset.png" alt="Sunset" className="icon" />{" "}
+            {selectedLocation.weather.sunset}
+          </p>
           <p className="forecast-link">Click for forecast</p>
         </div>
       )}
