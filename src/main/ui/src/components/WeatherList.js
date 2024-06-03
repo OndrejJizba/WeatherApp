@@ -60,8 +60,14 @@ const WeatherList = () => {
             ></div>
             <div className="card-content">
               <h1>{cityWeather.city}</h1>
-              <p>{cityWeather.temperature}°C</p>
-              <p>{cityWeather.description}</p>
+              <h5>{Math.round(cityWeather.temperature)}°C</h5>
+              <p>
+                <img
+                  src={cityWeather.icon}
+                  alt="Weather Icon"
+                  className="weather-icon"
+                />
+              </p>
               <p>
                 <img src="/icons/sunrise.png" alt="Sunrise" className="icon" />{" "}
                 {cityWeather.sunrise}

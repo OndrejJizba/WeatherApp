@@ -86,8 +86,14 @@ function SearchBar() {
           <h2>
             {selectedLocation.name}, {selectedLocation.country}
           </h2>
-          <p>{selectedLocation.weather.temperature}°C</p>
-          <p>{selectedLocation.weather.description}</p>
+          <h5>{Math.round(selectedLocation.weather.temperature)}°C</h5>
+          <p>
+                <img
+                  src={selectedLocation.weather.icon}
+                  alt="Weather Icon"
+                  className="weather-icon"
+                />
+              </p>
           <p>
             <img src="/icons/sunrise.png" alt="Sunrise" className="icon" />{" "}
             {selectedLocation.weather.sunrise}

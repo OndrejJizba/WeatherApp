@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./DetailedWeather.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const Forecast = () => {
   const { lat, lon } = useParams();
@@ -80,14 +80,31 @@ const Forecast = () => {
           {Object.keys(groupedData).map((date) => (
             <tr key={date}>
               <td>{date}</td>
-              {["02:00", "05:00", "08:00", "11:00", "14:00", "17:00", "20:00", "23:00"].map((time) => {
-                const forecast = groupedData[date].find(f => formatTime(f.dt).includes(time));
+              {[
+                "02:00",
+                "05:00",
+                "08:00",
+                "11:00",
+                "14:00",
+                "17:00",
+                "20:00",
+                "23:00",
+              ].map((time) => {
+                const forecast = groupedData[date].find((f) =>
+                  formatTime(f.dt).includes(time)
+                );
                 return (
                   <td key={time}>
                     {forecast ? (
                       <>
-                        <div>{forecast.temp}°C</div>
-                        <div>{forecast.description}</div>
+                        <div>{Math.round(forecast.temp)}°C</div>
+                        <div>
+                          <img
+                            src={forecast.icon}
+                            alt="Weather Icon"
+                            className="forecast-icon"
+                          />
+                        </div>
                       </>
                     ) : (
                       <div></div>

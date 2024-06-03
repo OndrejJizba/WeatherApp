@@ -86,8 +86,14 @@ const DetailedWeather = () => {
                   <td key={time}>
                     {forecast ? (
                       <>
-                        <div>{forecast.temperature}°C</div>
-                        <div>{forecast.description}</div>
+                        <div>{Math.round(forecast.temperature)}°C</div>
+                        <div>
+                          <img
+                            src={forecast.icon}
+                            alt="Weather Icon"
+                            className="forecast-icon"
+                          />
+                        </div>
                       </>
                     ) : (
                       <div></div>
