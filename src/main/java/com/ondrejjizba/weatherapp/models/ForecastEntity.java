@@ -20,4 +20,5 @@ public class ForecastEntity {
     private double temp;
     private String description;
     private Long timezone;
+    private String icon;
 }

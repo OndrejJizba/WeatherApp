@@ -23,6 +23,7 @@ public class WeatherEntity {
     private double temperature;
     private String sunrise;
     private String sunset;
+    private String icon;
 
     public WeatherEntity(String name, String description, double temperature, String sunrise, String sunset) {
         this.name = name;

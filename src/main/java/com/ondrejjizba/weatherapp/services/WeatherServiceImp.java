@@ -65,6 +65,8 @@ public class WeatherServiceImp implements WeatherService{
         weatherEntity.setTemperature(weatherData.getMain().getTemp());
         weatherEntity.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
         weatherEntity.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+        String icon = weatherData.getWeather()[0].getIcon();
+        weatherEntity.setIcon("https://openweathermap.org/img/wn/" + icon + ".png");
         weatherRepository.save(weatherEntity);
         return weatherEntity;
     }
@@ -122,6 +124,7 @@ public class WeatherServiceImp implements WeatherService{
                 forecast.setTemp(item.get("main").get("temp").asDouble());
                 forecast.setDescription(item.get("weather").get(0).get("description").asText());
                 forecast.setTimezone(rootNode.get("city").get("timezone").asLong());
+                forecast.setIcon(item.get("weather").get(0).get("icon").asText());
                 forecastResponse.add(forecast);
             }
         }
@@ -143,6 +146,9 @@ public class WeatherServiceImp implements WeatherService{
                 forecast.setTemp(item.get("main").get("temp").asDouble());
                 forecast.setDescription(item.get("weather").get(0).get("description").asText());
                 forecast.setTimezone(rootNode.get("city").get("timezone").asLong());
+                String icon = item.get("weather").get(0).get("icon").asText();
+                String iconURL = "https://openweathermap.org/img/wn/" + icon + "@2x.png";
+                forecast.setIcon(iconURL);
                 forecastResponse.add(forecast);
             }
         }

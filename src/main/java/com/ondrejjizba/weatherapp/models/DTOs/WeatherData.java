@@ -20,6 +20,7 @@ public class WeatherData {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Weather {
         private String description;
+        private String icon;
     }
 
     @Getter

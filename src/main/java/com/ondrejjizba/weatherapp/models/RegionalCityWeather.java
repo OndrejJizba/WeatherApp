@@ -20,6 +20,7 @@ public class RegionalCityWeather {
     private String description;
     private String sunrise;
     private String sunset;
+    private String icon;
     @DateTimeFormat(pattern = "dd-MM-yy HH:mm:ss")
     private LocalDateTime updatedAt;
     @OneToOne (fetch = FetchType.LAZY)

@@ -56,6 +56,7 @@ public class WeatherController {
             result.put("temperature", weatherEntity.getTemperature());
             result.put("sunrise", weatherEntity.getSunrise());
             result.put("sunset", weatherEntity.getSunset());
+            result.put("icon", weatherEntity.getIcon());
             return ResponseEntity.status(200).body(result);
         } catch (CityNotFoundException e) {
             return ResponseEntity.status(404).body("City not found for given coordinates.");
@@ -118,6 +119,7 @@ public class WeatherController {
             cityWeather.put("picture", regionalCity.getPicture());
             cityWeather.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
             cityWeather.put("id", regionalCity.getId());
+            cityWeather.put("icon", regionalCity.getRegionalCityWeather().getIcon());
             result.add(cityWeather);
         }
 

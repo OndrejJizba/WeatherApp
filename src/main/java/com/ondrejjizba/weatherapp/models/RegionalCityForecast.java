@@ -19,6 +19,7 @@ public class RegionalCityForecast {
     private String time;
     private double temperature;
     private String description;
+    private String icon;
     @ManyToOne
     @JsonIgnore
     private RegionalCity regionalCity;

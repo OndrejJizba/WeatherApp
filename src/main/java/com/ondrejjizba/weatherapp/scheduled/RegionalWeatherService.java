@@ -60,6 +60,8 @@ public class RegionalWeatherService {
             regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
             regionalCityWeather.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
             regionalCityWeather.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+            String icon = weatherData.getWeather()[0].getIcon();
+            regionalCityWeather.setIcon("https://openweathermap.org/img/wn/" + icon + ".png");
             regionalCityWeather.setUpdatedAt(LocalDateTime.now());
             city.setRegionalCityWeather(regionalCityWeather);
             regionalCityWeather.setRegionalCity(city);
@@ -86,6 +88,8 @@ public class RegionalWeatherService {
                 regionalCityForecast.setTime(UnixTimeConverter.converterDayTime(forecast.getDt(), forecast.getTimezone()));
                 regionalCityForecast.setDescription(forecast.getDescription());
                 regionalCityForecast.setTemperature(forecast.getTemp());
+                String icon = forecast.getIcon();
+                regionalCityForecast.setIcon("https://openweathermap.org/img/wn/" + icon + "@2x.png");
                 regionalCityForecast.setRegionalCity(city);
                 regionalCityForecastRepository.save(regionalCityForecast);
             }
