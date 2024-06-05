@@ -15,6 +15,8 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ import java.util.*;
 
 @RestController
 public class WeatherController {
+    private static final Logger logger = LoggerFactory.getLogger(WeatherController.class);
     private final WeatherService weatherService;
     private final RegionalWeatherService regionalWeatherService;
     private final RegionalCityRepository regionalCityRepository;
@@ -47,6 +50,7 @@ public class WeatherController {
 
     @GetMapping("/weather")
     public ResponseEntity<?> getCurrentWeather(@RequestParam String lat, @RequestParam String lon) {
+        logger.info("Received request for current weather with lat: {} and lon: {}", lat, lon);
         try {
             String response = weatherService.fetchWeatherData(lat, lon);
             WeatherEntity weatherEntity = weatherService.processWeatherData(response);
@@ -57,38 +61,48 @@ public class WeatherController {
             result.put("sunrise", weatherEntity.getSunrise());
             result.put("sunset", weatherEntity.getSunset());
             result.put("icon", weatherEntity.getIcon());
+            logger.info("Successfully fetched current weather for lat: {} and lon: {}", lat, lon);
             return ResponseEntity.status(200).body(result);
         } catch (CityNotFoundException e) {
+            logger.info("City not found for lat: {} and lon: {}", lat, lon, e);
             return ResponseEntity.status(404).body("City not found for given coordinates.");
         } catch (IOException e) {
+            logger.error("Error fetching weather data for lat: {} and lon: {}", lat, lon, e);
             return ResponseEntity.status(500).body("Error fetching weather data.");
         }
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchByName(@RequestParam String name) {
+        logger.info("Received request to search city by name: {}", name);
         try {
             String response = weatherService.fetchGeolocationData(name);
             List<GeolocationData> geolocationData = weatherService.processGeolocationData(response);
+            logger.info("Successfully fetched geolocation data for city: {}", name);
             return ResponseEntity.status(200).body(geolocationData);
         } catch (CityNotFoundException e) {
+            logger.info("City not found with name: {}", name, e);
             return ResponseEntity.status(404).body("City with given name doesn't exist.");
         } catch (IOException e) {
+            logger.error("Error fetching geolocation data for city: {}", name, e);
             return ResponseEntity.status(500).body("Error fetching geolocation data.");
         }
     }
 
     @GetMapping("/city/{id}")
-    public ResponseEntity<?> listRegionalCitiesWeather(@PathVariable Long id) throws Exception {
+    public ResponseEntity<?> listRegionalCitiesWeather(@PathVariable Long id) {
+        logger.info("Received request for weather of city with ID: {}", id);
         Optional<RegionalCity> regionalCityOptional = regionalCityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
         if (regionalCityOptional.isEmpty()) {
+            logger.info("City with ID: {} doesn't exist", id);
             result.put("error", "City with given ID doesn't exist.");
             return ResponseEntity.status(400).body(result);
         }
 
         RegionalCity regionalCity = regionalCityOptional.get();
         if (regionalCityWeatherRepository.findAll().isEmpty()) {
+            logger.info("Weather data is empty, updating weather for regional cities.");
             regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
         }
         result.put("city", regionalCity.getCity());
@@ -97,12 +111,15 @@ public class WeatherController {
         result.put("sunrise", regionalCity.getRegionalCityWeather().getSunrise());
         result.put("sunset", regionalCity.getRegionalCityWeather().getSunset());
         result.put("updatedAt", regionalCity.getRegionalCityWeather().getUpdatedAt());
+        logger.info("Successfully fetched weather for city with ID: {}", id);
         return ResponseEntity.status(200).body(result);
     }
 
     @GetMapping("/cities")
-    public ResponseEntity<?> listAllCitiesWeather() throws IOException {
+    public ResponseEntity<?> listAllCitiesWeather() {
+        logger.info("Received request for weather of all regional cities.");
         if (regionalCityWeatherRepository.findAll().isEmpty()) {
+            logger.info("Weather data is empty, updating weather for all regional cities.");
             regionalWeatherService.hourlyRegionalCitiesWeatherUpdate();
         }
 
@@ -122,21 +139,24 @@ public class WeatherController {
             cityWeather.put("icon", regionalCity.getRegionalCityWeather().getIcon());
             result.add(cityWeather);
         }
-
+        logger.info("Successfully received weather for all regional cities.");
         return ResponseEntity.status(200).body(result);
     }
 
     @GetMapping("/forecast/{id}")
-    public ResponseEntity<?> getForecastByCity(@PathVariable Long id) throws IOException {
+    public ResponseEntity<?> getForecastByCity(@PathVariable Long id) {
+        logger.info("Received request for forecast of regional city with ID: {}", id);
         Optional<RegionalCity> regionalCityOptional = regionalCityRepository.findById(id);
         Map<String, Object> result = new HashMap<>();
         if (regionalCityOptional.isEmpty()) {
+            logger.info("City with ID: {} doesn't exist", id);
             result.put("error", "City with given ID doesn't exist.");
             return ResponseEntity.status(400).body(result);
         }
 
         RegionalCity regionalCity = regionalCityOptional.get();
         if (regionalCityForecastRepository.findAll().isEmpty()) {
+            logger.info("Forecast data is empty, updating forecast for regional cities.");
             regionalWeatherService.dailyRegionalCitiesForecastUpdate();
         }
 
@@ -144,14 +164,22 @@ public class WeatherController {
 
         result.put("city", regionalCity.getCity());
         result.put("forecast", forecast);
+        logger.info("Successfully received forecast for regional city with ID: {}", id);
         return ResponseEntity.status(200).body(result);
     }
 
     @GetMapping("/forecast")
     public ResponseEntity<?> getForecast(@RequestParam String lat, @RequestParam String lon) throws IOException {
-        String response = weatherService.fetchForecastData(lat, lon);
-        List<ForecastEntity> forecast = weatherService.processForecastDataNoSave(response);
-        return ResponseEntity.status(200).body(forecast);
+        logger.info("Received request for forecast with lat: {} and lon: {}", lat, lon);
+        try {
+            String response = weatherService.fetchForecastData(lat, lon);
+            List<ForecastEntity> forecast = weatherService.processForecastDataNoSave(response);
+            logger.info("Successfully fetched forecast for lat: {} and lon: {}", lat, lon);
+            return ResponseEntity.status(200).body(forecast);
+        } catch (IOException e) {
+            logger.error("Error fetching forecast data for lat: {} and lon: {}", lat, lon, e);
+            return ResponseEntity.status(500).body("Error fetching forecast data.");
+        }
     }
 
 

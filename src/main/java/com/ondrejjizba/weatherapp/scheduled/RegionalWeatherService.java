@@ -13,18 +13,20 @@ import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @Component
 public class RegionalWeatherService {
+    private static final Logger logger = LoggerFactory.getLogger(RegionalWeatherService.class);
     private final RegionalCityRepository regionalCityRepository;
     private final RegionalCityWeatherRepository regionalCityWeatherRepository;
     private final RegionalCityForecastRepository regionalCityForecastRepository;
@@ -42,31 +44,38 @@ public class RegionalWeatherService {
     }
 
     @Scheduled(cron = "0 0 * * * *")
-    public void hourlyRegionalCitiesWeatherUpdate() throws IOException {
+    public void hourlyRegionalCitiesWeatherUpdate() {
+        logger.info("Executing hourly regional cities weather update");
         List<RegionalCity> cities = regionalCityRepository.findAll();
         for (RegionalCity city : cities) {
-            String response = weatherService.fetchWeatherData(city.getLat(), city.getLon());
-            WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
+            try {
+                logger.info("Updating weather for city: {}", city.getCity());
+                String response = weatherService.fetchWeatherData(city.getLat(), city.getLon());
+                WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
 
-            RegionalCityWeather regionalCityWeather = new RegionalCityWeather();
-            if (city.getRegionalCityWeather() != null) {
-                regionalCityWeather = regionalCityWeatherRepository.findById(city.getRegionalCityWeather().getId())
-                        .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCityWeather().getId()));
+                RegionalCityWeather regionalCityWeather = new RegionalCityWeather();
+                if (city.getRegionalCityWeather() != null) {
+                    regionalCityWeather = regionalCityWeatherRepository.findById(city.getRegionalCityWeather().getId())
+                            .orElseThrow(() -> new EntityNotFoundException("Cannot find entity with ID " + city.getRegionalCityWeather().getId()));
+                }
+
+                if (city.getPicture() == null) setPicturePath(city);
+
+                regionalCityWeather.setTemperature(weatherData.getMain().getTemp());
+                regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
+                regionalCityWeather.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
+                regionalCityWeather.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+                String icon = weatherData.getWeather()[0].getIcon();
+                regionalCityWeather.setIcon("https://openweathermap.org/img/wn/" + icon + ".png");
+                regionalCityWeather.setUpdatedAt(LocalDateTime.now());
+                city.setRegionalCityWeather(regionalCityWeather);
+                regionalCityWeather.setRegionalCity(city);
+                regionalCityWeatherRepository.save(regionalCityWeather);
+                regionalCityRepository.save(city);
+                logger.info("Weather update completed for city: {}", city.getCity());
+            } catch (Exception e) {
+                logger.error("Error updating weather for city: {}", city.getCity(), e);
             }
-
-            if (city.getPicture() == null) setPicturePath(city);
-
-            regionalCityWeather.setTemperature(weatherData.getMain().getTemp());
-            regionalCityWeather.setDescription(weatherData.getWeather()[0].getDescription());
-            regionalCityWeather.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
-            regionalCityWeather.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
-            String icon = weatherData.getWeather()[0].getIcon();
-            regionalCityWeather.setIcon("https://openweathermap.org/img/wn/" + icon + ".png");
-            regionalCityWeather.setUpdatedAt(LocalDateTime.now());
-            city.setRegionalCityWeather(regionalCityWeather);
-            regionalCityWeather.setRegionalCity(city);
-            regionalCityWeatherRepository.save(regionalCityWeather);
-            regionalCityRepository.save(city);
         }
     }
 
@@ -77,23 +86,30 @@ public class RegionalWeatherService {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void dailyRegionalCitiesForecastUpdate() throws IOException {
+    public void dailyRegionalCitiesForecastUpdate() {
+        logger.info("Executing daily regional cities forecast update");
         regionalCityForecastRepository.deleteAll();
         List<RegionalCity> cities = regionalCityRepository.findAll();
         for (RegionalCity city : cities) {
-            String response = weatherService.fetchForecastData(city.getLat(), city.getLon());
-            List<ForecastEntity> forecasts = weatherService.processForecastData(response);
-            for (ForecastEntity forecast : forecasts) {
-                RegionalCityForecast regionalCityForecast = new RegionalCityForecast();
-                regionalCityForecast.setTime(UnixTimeConverter.converterDayTime(forecast.getDt(), forecast.getTimezone()));
-                regionalCityForecast.setDescription(forecast.getDescription());
-                regionalCityForecast.setTemperature(forecast.getTemp());
-                String icon = forecast.getIcon();
-                regionalCityForecast.setIcon("https://openweathermap.org/img/wn/" + icon + "@2x.png");
-                regionalCityForecast.setRegionalCity(city);
-                regionalCityForecastRepository.save(regionalCityForecast);
+            try {
+                logger.info("Updating forecast for city: {}", city.getCity());
+                String response = weatherService.fetchForecastData(city.getLat(), city.getLon());
+                List<ForecastEntity> forecasts = weatherService.processForecastData(response);
+                for (ForecastEntity forecast : forecasts) {
+                    RegionalCityForecast regionalCityForecast = new RegionalCityForecast();
+                    regionalCityForecast.setTime(UnixTimeConverter.converterDayTime(forecast.getDt(), forecast.getTimezone()));
+                    regionalCityForecast.setDescription(forecast.getDescription());
+                    regionalCityForecast.setTemperature(forecast.getTemp());
+                    String icon = forecast.getIcon();
+                    regionalCityForecast.setIcon("https://openweathermap.org/img/wn/" + icon + "@2x.png");
+                    regionalCityForecast.setRegionalCity(city);
+                    regionalCityForecastRepository.save(regionalCityForecast);
+                }
+                forecastRepository.deleteAll();
+                logger.info("Forecast update completed for city: {}", city.getCity());
+            } catch (Exception e) {
+                logger.error("Error updating forecast for city: {}", city.getCity(), e);
             }
-            forecastRepository.deleteAll();
         }
     }
 }
