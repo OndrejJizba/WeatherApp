@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -24,7 +24,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "city_id"))
     private List<FavoriteCity> favoriteCities;
 
-    public User(String username, String password) {
+    public UserInfo(String username, String password) {
         this.username = username;
         this.password = password;
     }

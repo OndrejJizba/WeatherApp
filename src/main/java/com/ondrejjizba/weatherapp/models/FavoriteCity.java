@@ -20,7 +20,7 @@ public class FavoriteCity {
     private double lon;
     private String name;
     @ManyToMany(mappedBy = "favoriteCities")
-    List<User> users = new ArrayList<>();
+    List<UserInfo> users = new ArrayList<>();
 
     public FavoriteCity(double lat, double lon) {
         this.lat = lat;
