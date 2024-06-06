@@ -1,7 +1,7 @@
 package com.ondrejjizba.weatherapp.services;
 
 import com.ondrejjizba.weatherapp.configuration.SecurityConfig;
-import com.ondrejjizba.weatherapp.models.DTOs.RegistrationRequest;
+import com.ondrejjizba.weatherapp.models.DTOs.UsernamePasswordRequest;
 import com.ondrejjizba.weatherapp.models.UserInfo;
 import com.ondrejjizba.weatherapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public Map<String, String> userRegistrationSuccessful(RegistrationRequest request) {
+    public Map<String, String> userRegistrationSuccessful(UsernamePasswordRequest request) {
         Map<String, String> result = new HashMap<>();
 
         UserInfo userInfo = new UserInfo(request.getUsername(),

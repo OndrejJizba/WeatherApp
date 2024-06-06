@@ -1,9 +1,9 @@
 package com.ondrejjizba.weatherapp.services;
 
-import com.ondrejjizba.weatherapp.models.DTOs.RegistrationRequest;
+import com.ondrejjizba.weatherapp.models.DTOs.UsernamePasswordRequest;
 
 import java.util.Map;
 
 public interface UserService {
-    Map<String, String> userRegistrationSuccessful(RegistrationRequest request);
+    Map<String, String> userRegistrationSuccessful(UsernamePasswordRequest request);
 }

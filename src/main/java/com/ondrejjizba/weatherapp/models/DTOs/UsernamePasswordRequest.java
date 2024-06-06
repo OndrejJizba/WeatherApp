@@ -9,14 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegistrationRequest {
+public class UsernamePasswordRequest {
     @NotBlank(message = "Username is required.")
     private String username;
     @NotBlank(message = "Password is required.")
     @Size(min = 6, message = "Password must have at least 6 characters.")
     private String password;
 
-    public RegistrationRequest(String username, String password) {
+    public UsernamePasswordRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }
