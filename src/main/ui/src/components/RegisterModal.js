@@ -19,27 +19,29 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
         onRequestClose();
       }
     } catch (err) {
-      setError("An error occurred during registration.");
-    }
+      if (err.response && err.response.data) {
+        setError(err.response.data.error || err.response.data.username || err.response.data.password || "An error occurred during registration.");
+      } else {
+        setError("An error occurred during registration.");
+      }
+    }    
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} contentLabel="Register">
-      <button className="close-button" onClick={onRequestClose}>X</button>
-      <h2>Register</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username:</label>
           <input
             type="text"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
         <div>
-          <label>Password:</label>
           <input
             type="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

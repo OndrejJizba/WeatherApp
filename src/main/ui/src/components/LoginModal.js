@@ -11,7 +11,10 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("/authenticate", { username, password });
+      const response = await axios.post("/authenticate", {
+        username,
+        password,
+      });
       if (response.data.jwtToken) {
         localStorage.setItem("token", response.data.jwtToken);
         alert("Login successful!");
@@ -21,33 +24,35 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
         setError("Invalid credentials.");
       }
     } catch (err) {
-      setError("An error occurred during login.");
+      setError("Wrong username and/or password.");
     }
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose} contentLabel="Login">
-      <button className="close-button" onClick={onRequestClose}>X</button>
-      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username:</label>
           <input
             type="text"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            style={{ width: "100%" }}
           />
         </div>
         <div>
-          <label>Password:</label>
           <input
             type="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            style={{ width: "100%" }}
           />
         </div>
         {error && <p className="error-message">{error}</p>}
-        <button type="submit">Login</button>
+        <button type="submit" style={{ width: "100%" }}>
+          Login
+        </button>
       </form>
     </Modal>
   );

@@ -1,88 +1,105 @@
 .ReactModal__Overlay {
-    background-color: rgba(0, 0, 0, 0.75) !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .ReactModal__Content {
-    position: relative;
-    width: 400px;
-    max-height: 90vh;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    outline: none;
-    overflow-y: auto;
-  }
-  
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  form div {
-    margin-bottom: 15px;
-  }
-  
-  form label {
-    margin-bottom: 5px;
-  }
-  
-  form input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  form button {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  form button:hover {
-    background-color: #0056b3;
-  }
-  
-  .error-message {
-    color: red;
-    margin-top: 10px;
-  }
-  
-  .nav-button {
-    margin: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .nav-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .nav-container {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+.ReactModal__Content {
+  position: relative;
+  width: 400px;
+  max-height: 25vh;
+  padding: 20px;
+  background: #f0f0f0;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  outline: none;
+  overflow-y: auto;
+  transition: all 0.3s ease-in-out;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.3s ease-in-out;
+}
+
+.close-button:hover {
+  color: #444;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  margin-bottom: 5px;
+}
+
+form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+form input, form button {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+}
+
+form button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+
+form button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: #d9534f;
+  margin-top: 10px;
+}
+
+.nav-button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.nav-button:hover {
+  background-color: #0056b3;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
