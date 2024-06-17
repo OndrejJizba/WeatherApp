@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.controllers;
 
+import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
 import com.ondrejjizba.weatherapp.repositories.WeatherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -22,6 +22,8 @@ class WeatherControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private WeatherRepository weatherRepository;
+    @Autowired
+    private RegionalCityRepository regionalCityRepository;
 
     @BeforeEach
     void setUp() {
@@ -87,5 +89,66 @@ class WeatherControllerTest {
                 .param("name", "qwertzuiop"))
                 .andExpect(status().is(404))
                 .andExpect(content().string("City with given name doesn't exist."));
+    }
+
+    @Test
+    void listAllCitiesWeatherTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/cities"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$", hasSize(equalTo(13))))
+                .andExpect(jsonPath("$[0].city", is(notNullValue())))
+                .andExpect(jsonPath("$[0].temperature", is(notNullValue())))
+                .andExpect(jsonPath("$[0].description", is(notNullValue())))
+                .andExpect(jsonPath("$[0].sunrise", is(notNullValue())))
+                .andExpect(jsonPath("$[0].sunset", is(notNullValue())))
+                .andExpect(jsonPath("$[0].picture", is(notNullValue())))
+                .andExpect(jsonPath("$[0].updatedAt", is(notNullValue())))
+                .andExpect(jsonPath("$[0].id", is(notNullValue())))
+                .andExpect(jsonPath("$[0].icon", is(notNullValue())))
+                .andExpect(jsonPath("$[0].lat", is(notNullValue())))
+                .andExpect(jsonPath("$[0].lon", is(notNullValue())));
+    }
+
+    @Test
+    void getForecastByCitySuccessful() throws Exception {
+        String cityName = regionalCityRepository.findById(1L).get().getCity();
+        mockMvc.perform(MockMvcRequestBuilders.get("/forecast/1"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.city", is(cityName)))
+                .andExpect(jsonPath("$.forecast", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.forecast[0].time", is(notNullValue())))
+                .andExpect(jsonPath("$.forecast[0].temperature", is(notNullValue())))
+                .andExpect(jsonPath("$.forecast[0].description", is(notNullValue())))
+                .andExpect(jsonPath("$.forecast[0].icon", is(notNullValue())));
+    }
+
+    @Test
+    void getForecastByCityCityNotFoundException() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/forecast/100"))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.error", is("City with given ID doesn't exist.")));
+    }
+
+    @Test
+    void getForecastSuccessful() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/forecast")
+                        .param("lat", "44.34")
+                        .param("lon", "10.99"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.[0].dt", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].temp", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].description", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].timezone", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].icon", is(notNullValue())));
+    }
+
+    @Test
+    void getForecastCityNotFoundException() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/forecast")
+                        .param("lat", "200.00")
+                        .param("lon", "200.00"))
+                .andExpect(status().is(500))
+                .andExpect(content().string("Error fetching forecast data."));
     }
 }
