@@ -7,6 +7,8 @@ import com.ondrejjizba.weatherapp.services.UserDetailsServiceImp;
 import com.ondrejjizba.weatherapp.services.UserService;
 import com.ondrejjizba.weatherapp.utils.JwtTokenUtil;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,7 @@ import java.util.Map;
 
 @RestController
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
@@ -44,25 +47,31 @@ public class UserController {
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@Valid @RequestBody UsernamePasswordRequest request,
                                           BindingResult bindingResult) {
+        logger.info("Received request for registration with username: {}", request.getUsername());
         if (bindingResult.hasErrors()) {
+            logger.error("Validation error during registration with username: {}", request.getUsername());
             return ValidationError.handleErrors(bindingResult);
         }
         Map<String, String> result = new HashMap<>();
         if (userRepository.existsByUsername(request.getUsername())) {
             result.put("error", "Username already exists.");
+            logger.error("Username already exists during registration with username: {}", request.getUsername());
             return ResponseEntity.status(400).body(result);
         }
+        logger.info("Registration successful with username: {}", request.getUsername());
         return ResponseEntity.status(200).body(userService.userRegistrationSuccessful(request));
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody UsernamePasswordRequest request) throws Exception {
+        logger.info("Received request for authentication with username: {}", request.getUsername());
         authenticate(request.getUsername(), request.getPassword());
 
         UserDetails userDetails = userDetailsServiceImp.loadUserByUsername(request.getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
         Map<String, String> result = new HashMap<>();
         result.put("jwtToken", token);
+        logger.info("Authentication successful with username: {}", request.getUsername());
         return ResponseEntity.status(200).body(result);
     }
 
@@ -74,10 +83,5 @@ public class UserController {
         } catch (BadCredentialsException e) {
             throw new Exception("INVALID_CREDENTIALS", e);
         }
-    }
-
-    @GetMapping("/test")
-    public String test(){
-        return "Hello";
     }
 }
