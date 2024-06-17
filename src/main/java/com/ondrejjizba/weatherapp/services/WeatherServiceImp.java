@@ -72,38 +72,6 @@ public class WeatherServiceImp implements WeatherService{
     }
 
     @Override
-    public String fetchGeolocationData(String cityName) {
-        String encodedCityName = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
-        HttpGet request = new HttpGet("http://api.openweathermap.org/geo/1.0/direct?q=" + encodedCityName + "&limit=5&appid=" + API_KEY);
-        CloseableHttpClient client = HttpClients.createDefault();
-        try {
-            return client.execute(request, new BasicHttpClientResponseHandler());
-        } catch (IOException e) {
-            throw new CityNotFoundException("City with given name doesn't exist.");
-        }
-    }
-
-    @Override
-    public List<GeolocationData> processGeolocationData(String response) throws JsonProcessingException {
-        List<GeolocationData> geolocationData = objectMapper.readValue(response, new TypeReference<>() {});
-
-        if (geolocationData.isEmpty()) {
-            throw new CityNotFoundException("City with given name doesn't exist.");
-        }
-
-        List<GeolocationData> geolocationResponse = new ArrayList<>();
-        for (GeolocationData data : geolocationData) {
-            GeolocationData geoResp = new GeolocationData();
-            geoResp.setName(data.getName());
-            geoResp.setLat(data.getLat());
-            geoResp.setLon(data.getLon());
-            geoResp.setCountry(data.getCountry());
-            geolocationResponse.add(geoResp);
-        }
-        return geolocationResponse;
-    }
-
-    @Override
     public String fetchForecastData(String lat, String lon) throws IOException {
         HttpGet request = new HttpGet("https://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY);
         CloseableHttpClient client = HttpClients.createDefault();
