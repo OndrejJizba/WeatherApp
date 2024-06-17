@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class FavoriteCity {
     private double lat;
     private double lon;
     private String name;
+    @JsonIgnore
     @ManyToMany(mappedBy = "favoriteCities")
     List<UserInfo> users = new ArrayList<>();
 

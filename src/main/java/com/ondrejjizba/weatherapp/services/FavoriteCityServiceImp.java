@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class FavoriteCityServiceImp implements FavoriteCityService{
+public class FavoriteCityServiceImp implements FavoriteCityService {
     private final UserRepository userRepository;
     private final FavoriteCityRepository favoriteCityRepository;
     private final JwtTokenUtil jwtTokenUtil;
@@ -28,16 +28,16 @@ public class FavoriteCityServiceImp implements FavoriteCityService{
     public void addToFavorites(String jwtToken, double lat, double lon) {
         String username = jwtTokenUtil.extractUsername(jwtToken);
         UserInfo user = userRepository.findByUsername(username);
-        if (favoriteCityRepository.existsByLatAndLon(lat, lon)) {
-            FavoriteCity favoriteCity = favoriteCityRepository.findByLatAndLon(lat, lon);
-            user.getFavoriteCities().add(favoriteCity);
-            userRepository.save(user);
-        } else {
-            FavoriteCity favoriteCity = new FavoriteCity(lat, lon);
-            user.getFavoriteCities().add(favoriteCity);
-            favoriteCityRepository.save(favoriteCity);
-            userRepository.save(user);
-        }
+            if (favoriteCityRepository.existsByLatAndLon(lat, lon)) {
+                FavoriteCity favoriteCity = favoriteCityRepository.findByLatAndLon(lat, lon);
+                user.getFavoriteCities().add(favoriteCity);
+                userRepository.save(user);
+            } else {
+                FavoriteCity favoriteCity = new FavoriteCity(lat, lon);
+                user.getFavoriteCities().add(favoriteCity);
+                favoriteCityRepository.save(favoriteCity);
+                userRepository.save(user);
+            }
     }
 
     @Override
@@ -47,5 +47,10 @@ public class FavoriteCityServiceImp implements FavoriteCityService{
         List<UserInfo> userInfos = new ArrayList<>();
         userInfos.add(user);
         return favoriteCityRepository.findAllByUsers(userInfos);
+    }
+
+    @Override
+    public boolean existsByLatAndLon(double lat, double lon) {
+        return favoriteCityRepository.existsByLatAndLon(lat, lon);
     }
 }

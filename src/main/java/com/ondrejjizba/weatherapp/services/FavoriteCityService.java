@@ -7,4 +7,5 @@ import java.util.List;
 public interface FavoriteCityService {
     void addToFavorites(String jwtToken, double lat, double lon);
     List<FavoriteCity> listFavoriteCitiesByUser(String jwtToken);
+    boolean existsByLatAndLon(double lat, double lon);
 }
