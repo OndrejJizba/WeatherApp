@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ondrejjizba.weatherapp.models.FavoriteCity;
 import com.ondrejjizba.weatherapp.models.UserInfo;
 import com.ondrejjizba.weatherapp.repositories.FavoriteCityRepository;
@@ -16,28 +17,32 @@ public class FavoriteCityServiceImp implements FavoriteCityService {
     private final UserRepository userRepository;
     private final FavoriteCityRepository favoriteCityRepository;
     private final JwtTokenUtil jwtTokenUtil;
+    private final GeolocationService geolocationService;
 
     @Autowired
-    public FavoriteCityServiceImp(UserRepository userRepository, FavoriteCityRepository favoriteCityRepository, JwtTokenUtil jwtTokenUtil) {
+    public FavoriteCityServiceImp(UserRepository userRepository, FavoriteCityRepository favoriteCityRepository, JwtTokenUtil jwtTokenUtil, GeolocationService geolocationService) {
         this.userRepository = userRepository;
         this.favoriteCityRepository = favoriteCityRepository;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.geolocationService = geolocationService;
     }
 
     @Override
-    public void addToFavorites(String jwtToken, double lat, double lon) {
+    public void addToFavorites(String jwtToken, double lat, double lon) throws JsonProcessingException {
         String username = jwtTokenUtil.extractUsername(jwtToken);
         UserInfo user = userRepository.findByUsername(username);
-            if (favoriteCityRepository.existsByLatAndLon(lat, lon)) {
-                FavoriteCity favoriteCity = favoriteCityRepository.findByLatAndLon(lat, lon);
-                user.getFavoriteCities().add(favoriteCity);
-                userRepository.save(user);
-            } else {
-                FavoriteCity favoriteCity = new FavoriteCity(lat, lon);
-                user.getFavoriteCities().add(favoriteCity);
-                favoriteCityRepository.save(favoriteCity);
-                userRepository.save(user);
-            }
+        FavoriteCity favoriteCity;
+        if (favoriteCityRepository.existsByLatAndLon(lat, lon)) {
+            favoriteCity = favoriteCityRepository.findByLatAndLon(lat, lon);
+        } else {
+            favoriteCity = new FavoriteCity(lat, lon);
+            String fetchCityName = geolocationService.fetchReverseGeolocationData(String.valueOf(lat), String.valueOf(lon));
+            String cityName = geolocationService.processReverseGeolocationData(fetchCityName);
+            favoriteCity.setName(cityName);
+            favoriteCityRepository.save(favoriteCity);
+        }
+        user.getFavoriteCities().add(favoriteCity);
+        userRepository.save(user);
     }
 
     @Override

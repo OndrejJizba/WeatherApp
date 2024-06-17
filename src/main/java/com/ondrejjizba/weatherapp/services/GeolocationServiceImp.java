@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GeolocationServiceImp implements GeolocationService {
@@ -51,5 +52,26 @@ public class GeolocationServiceImp implements GeolocationService {
             geolocationResponse.add(geoResp);
         }
         return geolocationResponse;
+    }
+
+    @Override
+    public String fetchReverseGeolocationData(String lat, String lon) {
+        HttpGet request = new HttpGet("http://api.openweathermap.org/geo/1.0/reverse?lat=" + lat + "&lon=" + lon + "&limit=1&appid=" + API_KEY);
+        CloseableHttpClient client = HttpClients.createDefault();
+        try {
+            return client.execute(request, new BasicHttpClientResponseHandler());
+        } catch (IOException e) {
+            throw new CityNotFoundException("City with given coordinates doesn't exist.");
+        }
+    }
+
+    @Override
+    public String processReverseGeolocationData(String response) throws JsonProcessingException {
+        List<Map<String, Object>> responseList = objectMapper.readValue(response, new TypeReference<>() {});
+        if (!responseList.isEmpty()) {
+            Map<String, Object> responseMap = responseList.getFirst();
+            return (String) responseMap.get("name");
+        }
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.ondrejjizba.weatherapp.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ondrejjizba.weatherapp.models.FavoriteCity;
 import com.ondrejjizba.weatherapp.models.UserInfo;
 import com.ondrejjizba.weatherapp.repositories.UserRepository;
@@ -34,7 +35,7 @@ public class FavoriteCityController {
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<?> addToFavorites(@RequestHeader("Authorization") String jwtToken, @RequestParam double lat, @RequestParam double lon) {
+    public ResponseEntity<?> addToFavorites(@RequestHeader("Authorization") String jwtToken, @RequestParam double lat, @RequestParam double lon) throws JsonProcessingException {
         String token = jwtToken.substring(7);
         String username = jwtTokenUtil.extractUsername(token);
         UserInfo user = userRepository.findByUsername(username);
