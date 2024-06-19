@@ -84,6 +84,7 @@
 }
 
 .selected-location {
+  position: relative;
   margin-top: 20px;
   padding: 10px;
   background-color: #f8f9fa;
@@ -91,7 +92,6 @@
   border-radius: 4px;
   width: 300px;
   text-align: center;
-  cursor: pointer;
 }
 
 .selected-location h2 {
@@ -111,4 +111,46 @@
   width: 1.5em;
   height: 1.5em;
   vertical-align: middle;
+}
+
+.add-favorite-button2 {
+  position: absolute;
+  top: 0px;
+  right: -30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 30px;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.forecast-button {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 30px;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  text-decoration: none;
+}
+.favorite-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
 }
