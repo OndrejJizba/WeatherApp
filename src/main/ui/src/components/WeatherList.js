@@ -69,6 +69,11 @@ const WeatherList = () => {
     return <div className="loading">Loading...</div>;
   }
 
+  function isUserLoggedIn() {
+    const token = localStorage.getItem('token');
+    return !!token;
+  }
+
   return (
     <div className="container">
       {weatherData.map((cityWeather) => (
@@ -84,7 +89,8 @@ const WeatherList = () => {
               <div className="card-content">
                 <h1>
                   {cityWeather.city}
-                  <button
+                  {isUserLoggedIn() && (
+                    <button
                     className="add-favorite-button"
                     onClick={(e) => {
                       e.preventDefault();
@@ -93,6 +99,7 @@ const WeatherList = () => {
                   >
                     +
                   </button>
+                  )}
                 </h1>
                 <h5>{Math.round(cityWeather.temperature)}°C</h5>
                 <p>
@@ -124,7 +131,7 @@ const WeatherList = () => {
         </div>
       ))}
       <div className="last-updated">Last updated: {lastUpdated}</div>
-      {modalMessage && <Modal message={modalMessage} onClose={closeModal} />} {/* Render the modal */}
+      {modalMessage && <Modal message={modalMessage} onClose={closeModal} />}
     </div>
   );
 };
