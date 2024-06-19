@@ -1,10 +1,13 @@
 package com.ondrejjizba.weatherapp.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ondrejjizba.weatherapp.models.DTOs.FavoriteCityResponse;
 import com.ondrejjizba.weatherapp.models.FavoriteCity;
 import com.ondrejjizba.weatherapp.models.UserInfo;
+import com.ondrejjizba.weatherapp.models.WeatherEntity;
 import com.ondrejjizba.weatherapp.repositories.UserRepository;
 import com.ondrejjizba.weatherapp.services.FavoriteCityService;
+import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,24 +24,38 @@ import java.util.List;
 public class FavoriteCityController {
     private static final Logger logger = LoggerFactory.getLogger(FavoriteCityController.class);
     private final FavoriteCityService favoriteCityService;
+    private final WeatherService weatherService;
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public FavoriteCityController(FavoriteCityService favoriteCityService,
+    public FavoriteCityController(FavoriteCityService favoriteCityService, WeatherService weatherService,
                                   UserRepository userRepository, JwtTokenUtil jwtTokenUtil) {
         this.favoriteCityService = favoriteCityService;
+        this.weatherService = weatherService;
         this.userRepository = userRepository;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> listFavoriteCitiesByUser(@RequestHeader("Authorization") String jwtToken) {
+    public ResponseEntity<?> listFavoriteCitiesByUser(@RequestHeader("Authorization") String jwtToken) throws IOException {
         logger.info("Received request to list favorite cities by user " + jwtTokenUtil.extractUsername(jwtToken.substring(7)));
         String token = jwtToken.substring(7);
         List<FavoriteCity> favoriteCities = favoriteCityService.listFavoriteCitiesByUser(token);
+        List<FavoriteCityResponse> response = new ArrayList<>();
+        for (FavoriteCity favoriteCity : favoriteCities) {
+            FavoriteCityResponse favCityResp = new FavoriteCityResponse();
+            favCityResp.setName(favoriteCity.getName());
+            favCityResp.setLat(favoriteCity.getLat());
+            favCityResp.setLon(favoriteCity.getLon());
+            String fetchData = weatherService.fetchWeatherData(String.valueOf(favoriteCity.getLat()), String.valueOf(favoriteCity.getLon()));
+            WeatherEntity weatherEntity = weatherService.processWeatherData(fetchData);
+            favCityResp.setTemp(weatherEntity.getTemperature());
+            favCityResp.setIcon(weatherEntity.getIcon());
+            response.add(favCityResp);
+        }
         logger.info("Listing favorite cities by user " + jwtTokenUtil.extractUsername(jwtToken.substring(7)) + " successful.");
-        return ResponseEntity.status(200).body(favoriteCities);
+        return ResponseEntity.status(200).body(response);
     }
 
     @PostMapping("/favorites")
