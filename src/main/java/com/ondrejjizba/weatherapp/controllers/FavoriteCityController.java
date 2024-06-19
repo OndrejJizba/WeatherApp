@@ -6,6 +6,7 @@ import com.ondrejjizba.weatherapp.models.FavoriteCity;
 import com.ondrejjizba.weatherapp.models.UserInfo;
 import com.ondrejjizba.weatherapp.models.WeatherEntity;
 import com.ondrejjizba.weatherapp.repositories.UserRepository;
+import com.ondrejjizba.weatherapp.repositories.WeatherRepository;
 import com.ondrejjizba.weatherapp.services.FavoriteCityService;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.JwtTokenUtil;
@@ -27,14 +28,17 @@ public class FavoriteCityController {
     private final WeatherService weatherService;
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
+    private final WeatherRepository weatherRepository;
 
     @Autowired
     public FavoriteCityController(FavoriteCityService favoriteCityService, WeatherService weatherService,
-                                  UserRepository userRepository, JwtTokenUtil jwtTokenUtil) {
+                                  UserRepository userRepository, JwtTokenUtil jwtTokenUtil,
+                                  WeatherRepository weatherRepository) {
         this.favoriteCityService = favoriteCityService;
         this.weatherService = weatherService;
         this.userRepository = userRepository;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.weatherRepository = weatherRepository;
     }
 
     @GetMapping("/profile")
@@ -48,10 +52,16 @@ public class FavoriteCityController {
             favCityResp.setName(favoriteCity.getName());
             favCityResp.setLat(favoriteCity.getLat());
             favCityResp.setLon(favoriteCity.getLon());
-            String fetchData = weatherService.fetchWeatherData(String.valueOf(favoriteCity.getLat()), String.valueOf(favoriteCity.getLon()));
-            WeatherEntity weatherEntity = weatherService.processWeatherData(fetchData);
-            favCityResp.setTemp(weatherEntity.getTemperature());
-            favCityResp.setIcon(weatherEntity.getIcon());
+            if (weatherRepository.findByName(favoriteCity.getName()) == null) {
+                String fetchData = weatherService.fetchWeatherData(String.valueOf(favoriteCity.getLat()), String.valueOf(favoriteCity.getLon()));
+                WeatherEntity weatherEntity = weatherService.processWeatherData(fetchData);
+                favCityResp.setTemp(weatherEntity.getTemperature());
+                favCityResp.setIcon(weatherEntity.getIcon());
+            } else {
+                WeatherEntity weatherEntity = weatherRepository.findByName(favoriteCity.getName());
+                favCityResp.setTemp(weatherEntity.getTemperature());
+                favCityResp.setIcon(weatherEntity.getIcon());
+            }
             response.add(favCityResp);
         }
         logger.info("Listing favorite cities by user " + jwtTokenUtil.extractUsername(jwtToken.substring(7)) + " successful.");
