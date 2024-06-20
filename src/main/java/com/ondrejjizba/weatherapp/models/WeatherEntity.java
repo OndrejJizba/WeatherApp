@@ -24,6 +24,8 @@ public class WeatherEntity {
     private String sunrise;
     private String sunset;
     private String icon;
+    private double lat;
+    private double lon;
 
     public WeatherEntity(String name, String description, double temperature, String sunrise, String sunset) {
         this.name = name;

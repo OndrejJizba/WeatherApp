@@ -63,6 +63,8 @@ public class WeatherServiceImp implements WeatherService{
         weatherEntity.setName(weatherData.getName());
         weatherEntity.setDescription(weatherData.getWeather()[0].getDescription());
         weatherEntity.setTemperature(weatherData.getMain().getTemp());
+        weatherEntity.setLat(weatherData.getCoord().getLat());
+        weatherEntity.setLon(weatherData.getCoord().getLon());
         weatherEntity.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
         weatherEntity.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
         String icon = weatherData.getWeather()[0].getIcon();

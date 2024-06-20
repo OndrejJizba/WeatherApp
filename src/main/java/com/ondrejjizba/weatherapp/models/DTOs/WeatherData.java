@@ -15,8 +15,10 @@ public class WeatherData {
     private Sys sys;
     private String name;
     private Long timezone;
+    private Coord coord;
 
     @Getter
+    @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Weather {
         private String description;
@@ -24,15 +26,25 @@ public class WeatherData {
     }
 
     @Getter
+    @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MainData {
         private double temp;
     }
 
     @Getter
+    @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Sys {
         private Long sunrise;
         private Long sunset;
+    }
+
+    @Getter
+    @Setter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Coord {
+        private double lat;
+        private double lon;
     }
 }
