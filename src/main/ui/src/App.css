@@ -1,0 +1,16 @@
+.nav-button, .nav-button:link, .nav-button:visited {
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    border: 1px solid transparent; 
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .nav-button:hover {
+    background-color: white;
+    color: blue;
+    border: 1px solid blue;
+  }

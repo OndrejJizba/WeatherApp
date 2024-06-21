@@ -9,6 +9,7 @@ import RegisterModal from "./components/RegisterModal";
 import LoginModal from "./components/LoginModal";
 import Profile from "./components/Profile";
 import "./components/ModalStyles.css";
+import "./App.css";
 
 const App = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
