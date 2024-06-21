@@ -99,7 +99,11 @@ function SearchBar() {
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Enter city name..."
       />
-      <button onClick={handleSearch} disabled={loading}>
+      <button
+        className="search-button"
+        onClick={handleSearch}
+        disabled={loading}
+      >
         {loading ? <span className="loader"></span> : "Search"}
       </button>
 
@@ -140,7 +144,7 @@ function SearchBar() {
             {selectedLocation.weather.sunset}
           </p>
           <button className="forecast-button" onClick={handleForecastClick}>
-            Forecast
+          <img src="/icons/forecast.png" alt="forecast icon" className="icon" />
           </button>
           {isUserLoggedIn() && (
             <button
@@ -150,7 +154,7 @@ function SearchBar() {
                 addToFavorites(selectedLocation.lat, selectedLocation.lon);
               }}
             >
-              Favorite
+              <img src="/icons/like.png" alt="favorite icon" className="icon" />
             </button>
           )}
         </div>

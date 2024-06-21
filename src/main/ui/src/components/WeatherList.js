@@ -97,7 +97,11 @@ const WeatherList = () => {
                       addToFavorites(cityWeather.lat, cityWeather.lon);
                     }}
                   >
-                    +
+                    <img
+                    src="/icons/like.png"
+                    alt="favorite icon"
+                    className="icon"
+                  />
                   </button>
                   )}
                 </h1>
