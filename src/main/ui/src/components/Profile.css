@@ -43,3 +43,26 @@
   box-sizing: border-box;
 }
 
+.remove-favorite-button {
+  background-color: #f44336;
+  color: white;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin-left: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+  height: 40px;
+  width: 100px;
+}
+
+.remove-favorite-button:hover {
+  background-color: white;
+  color: #f44336;
+  border: 1px solid #f44336;
+}
+

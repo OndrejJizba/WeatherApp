@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Profile.css";
+import Modal from "./Modal";
 
 const Profile = () => {
   const [username, setUsername] = useState("");
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,6 +30,7 @@ const Profile = () => {
             name: city.name,
             temp: Math.round(city.temp),
             icon: city.icon,
+            id: city.id,
           }))
         );
         setIsLoading(false);
@@ -40,6 +43,10 @@ const Profile = () => {
     fetchProfileData();
   }, []);
 
+  const closeModal = () => {
+    setModalMessage("");
+  };
+
   if (isLoading) {
     return <div className="loading">Loading...</div>;
   }
@@ -47,6 +54,26 @@ const Profile = () => {
   if (error) {
     return <div className="error">{error}</div>;
   }
+
+  const handleDeleteFavorite = async (cityId) => {
+    const originalFavorites = [...favorites];
+    const optimisticFavorites = favorites.filter((favCity) => favCity.id !== cityId);
+    setFavorites(optimisticFavorites);
+  
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.delete(`/favorites/${cityId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      setModalMessage(response.data.message);
+    } catch (err) {
+      setFavorites(originalFavorites);
+      setError("Error removing city from favorites");
+    }
+  };
 
   return (
     <div className="profile-container">
@@ -57,16 +84,23 @@ const Profile = () => {
       ) : (
         <div className="favorite-table">
           {favorites.map((city, index) => (
-            <div key={index} className="favorite-row">
+            <div key={city.id} className="favorite-row">
               <div className="favorite-cell">{city.name}</div>
               <div className="favorite-cell">{city.temp}°C</div>
               <div className="favorite-cell icon-cell">
                 <img src={`${city.icon}`} alt="Weather icon" />
               </div>
+              <button
+              className="remove-favorite-button"
+              onClick={() => handleDeleteFavorite(city.id)}
+            >
+              Remove
+            </button>
             </div>
           ))}
         </div>
       )}
+      {modalMessage && <Modal message={modalMessage} onClose={closeModal} />}
     </div>
   );
 };
