@@ -1,15 +1,9 @@
 package com.ondrejjizba.weatherapp.scheduled;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ondrejjizba.weatherapp.models.*;
 import com.ondrejjizba.weatherapp.models.DTOs.WeatherData;
-import com.ondrejjizba.weatherapp.models.ForecastEntity;
-import com.ondrejjizba.weatherapp.models.RegionalCity;
-import com.ondrejjizba.weatherapp.models.RegionalCityForecast;
-import com.ondrejjizba.weatherapp.models.RegionalCityWeather;
-import com.ondrejjizba.weatherapp.repositories.ForecastRepository;
-import com.ondrejjizba.weatherapp.repositories.RegionalCityForecastRepository;
-import com.ondrejjizba.weatherapp.repositories.RegionalCityRepository;
-import com.ondrejjizba.weatherapp.repositories.RegionalCityWeatherRepository;
+import com.ondrejjizba.weatherapp.repositories.*;
 import com.ondrejjizba.weatherapp.services.WeatherService;
 import com.ondrejjizba.weatherapp.utils.UnixTimeConverter;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,15 +26,17 @@ public class RegionalWeatherService {
     private final RegionalCityForecastRepository regionalCityForecastRepository;
     private final ForecastRepository forecastRepository;
     private final WeatherService weatherService;
+    private final WeatherRepository weatherRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public RegionalWeatherService(RegionalCityRepository regionalCitiesRepository, RegionalCityWeatherRepository regionalCityWeatherRepository, RegionalCityForecastRepository regionalCityForecastRepository, ForecastRepository forecastRepository, WeatherService weatherService) {
+    public RegionalWeatherService(RegionalCityRepository regionalCitiesRepository, RegionalCityWeatherRepository regionalCityWeatherRepository, RegionalCityForecastRepository regionalCityForecastRepository, ForecastRepository forecastRepository, WeatherService weatherService, WeatherRepository weatherRepository) {
         this.regionalCityRepository = regionalCitiesRepository;
         this.regionalCityWeatherRepository = regionalCityWeatherRepository;
         this.regionalCityForecastRepository = regionalCityForecastRepository;
         this.forecastRepository = forecastRepository;
         this.weatherService = weatherService;
+        this.weatherRepository = weatherRepository;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -109,6 +105,29 @@ public class RegionalWeatherService {
                 logger.info("Forecast update completed for city: {}", city.getCity());
             } catch (Exception e) {
                 logger.error("Error updating forecast for city: {}", city.getCity(), e);
+            }
+        }
+    }
+
+    @Scheduled(cron = "0 0 * * * *")
+    public void hourlyWeatherEntityUpdate() {
+        logger.info("Executing hourly weather entity update");
+        List<WeatherEntity> weatherEntities = weatherRepository.findAll();
+        for (WeatherEntity weatherEntity : weatherEntities) {
+            try {
+                logger.info("Updating weather entity for city: {}", weatherEntity.getName());
+                String response = weatherService.fetchWeatherData(String.valueOf(weatherEntity.getLat()), String.valueOf(weatherEntity.getLon()));
+                WeatherData weatherData = objectMapper.readValue(response, WeatherData.class);
+                weatherEntity.setTemperature(weatherData.getMain().getTemp());
+                weatherEntity.setDescription(weatherData.getWeather()[0].getDescription());
+                weatherEntity.setSunrise(UnixTimeConverter.converterTime(weatherData.getSys().getSunrise(), weatherData.getTimezone()));
+                weatherEntity.setSunset(UnixTimeConverter.converterTime(weatherData.getSys().getSunset(), weatherData.getTimezone()));
+                String icon = weatherData.getWeather()[0].getIcon();
+                weatherEntity.setIcon("https://openweathermap.org/img/wn/" + icon + ".png");
+                weatherRepository.save(weatherEntity);
+                logger.info("Weather entity update completed for city: {}", weatherEntity.getName());
+            } catch (Exception e) {
+                logger.error("Error updating weather entity for city: {}", weatherEntity.getName(), e);
             }
         }
     }
