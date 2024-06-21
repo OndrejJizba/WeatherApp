@@ -13,4 +13,5 @@ public class FavoriteCityResponse {
     private double lon;
     private double temp;
     private String icon;
+    private Long id;
 }

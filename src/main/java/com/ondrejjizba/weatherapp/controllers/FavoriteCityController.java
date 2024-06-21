@@ -69,4 +69,25 @@ public class FavoriteCityController {
             return ResponseEntity.status(400).body(result);
         }
     }
+
+    @DeleteMapping("/favorites/{id}")
+    public ResponseEntity<?> deleteFromFavorites(@RequestHeader("Authorization") String jwtToken, @PathVariable Long id) {
+        logger.info("Received request to delete city from favorites, id: {}", id);
+        String token = jwtToken.substring(7);
+        String username = jwtTokenUtil.extractUsername(token);
+        UserInfo user = userRepository.findByUsername(username);
+        FavoriteCity favoriteCity = user.getFavoriteCities().stream().filter(f -> f.getId().equals(id)).findFirst().orElse(null);
+        HashMap<String, String> result = new HashMap<>();
+        if (favoriteCity != null) {
+            user.getFavoriteCities().remove(favoriteCity);
+            userRepository.save(user);
+            result.put("message", "The city was successfully removed from your favorite list.");
+            logger.info("Deleting city from favorites, id: {}", id);
+            return ResponseEntity.status(200).body(result);
+        } else {
+            result.put("message", "The city is not in your favorite list.");
+            logger.info("City is not in favorites, id: {}", id);
+            return ResponseEntity.status(400).body(result);
+        }
+    }
 }

@@ -77,6 +77,7 @@ public class FavoriteCityServiceImp implements FavoriteCityService {
             favCityResp.setName(favoriteCity.getName());
             favCityResp.setLat(favoriteCity.getLat());
             favCityResp.setLon(favoriteCity.getLon());
+            favCityResp.setId(favoriteCity.getId());
             List<WeatherEntity> weatherEntities = weatherRepository.findAll();
             WeatherEntity matchingWeatherEntity = null;
             for (WeatherEntity weatherEntity : weatherEntities) {
