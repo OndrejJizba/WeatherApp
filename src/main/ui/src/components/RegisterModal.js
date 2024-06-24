@@ -7,6 +7,7 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -15,8 +16,8 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
       if (response.data.error) {
         setError(response.data.error);
       } else {
-        alert("Registration successful!");
-        onRequestClose();
+        setShowSuccessModal(true);
+        handleRegisterSuccess();
       }
     } catch (err) {
       if (err.response && err.response.data) {
@@ -27,29 +28,47 @@ const RegisterModal = ({ isOpen, onRequestClose }) => {
     }    
   };
 
+  const handleRegisterSuccess = () => {
+    setShowSuccessModal(true);
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      onRequestClose();
+      window.location.reload();
+    }, 2000);
+  };
+
   return (
-    <Modal isOpen={isOpen} onRequestClose={onRequestClose} contentLabel="Register">
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {error && <p className="error-message">{error}</p>}
-        <button type="submit">Register</button>
-      </form>
-    </Modal>
+    <>
+      <Modal className="ReactModal__Overlay" isOpen={isOpen} onRequestClose={onRequestClose} contentLabel="Register">
+        <form onSubmit={handleSubmit}>
+          <div>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit">Register</button>
+        </form>
+      </Modal>
+      {showSuccessModal && (
+        <Modal className="ReactModal__Overlay success" isOpen={showSuccessModal} contentLabel="Success">
+          <div>
+            <p>Registration successful!</p>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 };
 
