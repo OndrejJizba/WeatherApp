@@ -14,7 +14,7 @@ import "./App.css";
 const App = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const fetchWeatherData = async () => {
@@ -29,6 +29,13 @@ const App = () => {
     setIsLoggedIn(false);
     window.location.reload();
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+  }
+}, []);
 
   return (
     <Router>
