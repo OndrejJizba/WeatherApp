@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Profile.css";
 import Modal from "./Modal";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [username, setUsername] = useState("");
@@ -9,6 +10,7 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [modalMessage, setModalMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,6 +33,8 @@ const Profile = () => {
             temp: Math.round(city.temp),
             icon: city.icon,
             id: city.id,
+            lat: city.lat,
+            lon: city.lon,
           }))
         );
         setIsLoading(false);
@@ -57,9 +61,11 @@ const Profile = () => {
 
   const handleDeleteFavorite = async (cityId) => {
     const originalFavorites = [...favorites];
-    const optimisticFavorites = favorites.filter((favCity) => favCity.id !== cityId);
+    const optimisticFavorites = favorites.filter(
+      (favCity) => favCity.id !== cityId
+    );
     setFavorites(optimisticFavorites);
-  
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.delete(`/favorites/${cityId}`, {
@@ -67,12 +73,16 @@ const Profile = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       setModalMessage(response.data.message);
     } catch (err) {
       setFavorites(originalFavorites);
       setError("Error removing city from favorites");
     }
+  };
+
+  const handleForecastClick = (lat, lon) => {
+    navigate(`/forecast/${lat}/${lon}`);
   };
 
   return (
@@ -91,11 +101,17 @@ const Profile = () => {
                 <img src={`${city.icon}`} alt="Weather icon" />
               </div>
               <button
-              className="remove-favorite-button"
-              onClick={() => handleDeleteFavorite(city.id)}
-            >
-              Remove
-            </button>
+                className="forecast-favorite-button"
+                onClick={() => handleForecastClick(city.lat, city.lon)}
+              >
+                Forecast
+              </button>
+              <button
+                className="remove-favorite-button"
+                onClick={() => handleDeleteFavorite(city.id)}
+              >
+                Remove
+              </button>
             </div>
           ))}
         </div>
