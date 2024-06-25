@@ -83,7 +83,7 @@ const WeatherList = () => {
               <div
                 className="card-image"
                 style={{
-                  backgroundImage: `url(http://localhost:8080${cityWeather.picture})`,
+                  backgroundImage: `url(${cityWeather.picture})`,
                 }}
               ></div>
               <div className="card-content">
